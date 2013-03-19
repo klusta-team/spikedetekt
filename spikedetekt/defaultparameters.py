@@ -5,22 +5,25 @@ Default values for global parameters
 DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
 # see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
 
-#SHANK_NUM = 1 #Number of shanks in a multishank probe, each with separate numbers e.g. Probename.probe.3
+# Probe file (no default value provided)
+# PROBE_FILE = 'probe_filename.py'
 
-# Options for computing in chunks
-CHUNK_SIZE = 20000   # number of time samples used in chunk for filtering and detection
-CHUNK_OVERLAP = 200 # number of samples that chunks overlap in time
+# Raw data files (no default values provided)
+# RAW_DATA_FILES = ['file1.dat', 'file2.dat']
 
-# Options for filtering
-F_LOW = 500. # low pass frequency (Hz)
-BUTTER_ORDER = 3 # Order of butterworth filter
-WRITE_FIL_FILE = True # write filtered output to .fil file
+# Output directory
+OUTPUT_DIR = '.'
 
 # Thresholding
 USE_SINGLE_THRESHOLD = False # use a single threshold for all channels
 CHUNKS_FOR_THRESH = 5 # number of chunks used to determine threshold for detection
 THRESH_SD = 4.5 # threshold for detection. standard deviations of signal
 DETECT_POSITIVE = False # detect spikes with positive threshold crossing
+
+# Options for filtering
+F_LOW = 500. # low pass frequency (Hz)
+BUTTER_ORDER = 3 # Order of butterworth filter
+WRITE_FIL_FILE = True # write filtered output to .fil file
 
 # Options for spike detection
 T_BEFORE = .0005 # time before peak in extracted spike
@@ -40,8 +43,15 @@ SHOW_PCS = False # show principal components
 USE_FLOAT_MASKS = True
 USE_INTERPOLATION = False
 ADDITIONAL_FLOAT_PENUMBRA = 2 # adds some more penumbra
-FLOAT_MASK_THRESH_SD = (2, 4.5) # (min, max), mask 0 at min, 1 at max
+FLOAT_MASK_THRESH_SD = (0, 4.5) # (min, max), mask 0 at min, 1 at max
 FLOAT_MASK_INTERPOLATION = 'x' # f(x) for x in [0,1], f(0)=0, f(1)=1
+
+# Options for computing in chunks
+CHUNK_SIZE = 20000   # number of time samples used in chunk for filtering and detection
+CHUNK_OVERLAP = 200 # number of samples that chunks overlap in time
+
+# Maximum number of spikes to process
+MAX_SPIKES = None # None for all spikes, or an int
 
 # Experimental options
 DO_GLOBAL_CLUSTERING = False
