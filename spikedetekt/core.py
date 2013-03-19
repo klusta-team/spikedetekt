@@ -54,6 +54,7 @@ def spike_detection_job(DatFileName, ProbeFileName, max_spikes=None,
     n_ch_dat = Parameters['NCHANNELS']
     sample_rate = Parameters['SAMPLERATE']
     set_globals_samples(sample_rate)
+    Parameters['CHUNK_OVERLAP'] = int(sample_rate*Parameters['CHUNK_OVERLAP_SECONDS'])
     
     DatDir = os.path.abspath(os.path.dirname(DatFileName))
     

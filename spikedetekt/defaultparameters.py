@@ -50,7 +50,7 @@ FLOAT_MASK_INTERPOLATION = 'x' # f(x) for x in [0,1], f(0)=0, f(1)=1
 
 # Options for computing in chunks
 CHUNK_SIZE = 20000   # number of time samples used in chunk for filtering and detection
-CHUNK_OVERLAP = 200 # number of samples that chunks overlap in time
+CHUNK_OVERLAP_SECONDS = 0.01 # overlap time (in seconds) of chunks, should be wider than spike width
 
 # Maximum number of spikes to process
 MAX_SPIKES = None # None for all spikes, or an int

@@ -48,6 +48,10 @@ if __name__=='__main__':
     if not 'NCHANNELS' in Parameters or not 'SAMPLERATE' in Parameters:
         print 'Parameters file needs NCHANNELS and SAMPLERATE options.'
         exit()
+        
+    if len(raw_data_files)>1:
+        print 'Can only process a single data file at the moment, multiple files will be added later.'
+        exit()
             
     spike_detection_job(raw_data_files[0], probe_file,
                         max_spikes=Parameters['MAX_SPIKES'],
