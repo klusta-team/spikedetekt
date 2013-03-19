@@ -22,7 +22,7 @@ def spike_subsets(ST_nc, ChSubsets):
     
 #m
 #m Inputs: spike_table - table with fields named "wave", "time", "st", "fet"
-#m         reorder_clus - bool, has to do with the SORT_CLUS_BY_CHANNEL within Caton's running parameters file (ANYHOW not implemented)
+#m         reorder_clus - bool, has to do with the SORT_CLUS_BY_CHANNEL within SpikeDetekt's running parameters file (ANYHOW not implemented)
 #m Output: a 1D array containing the cluster to which every spike is assigned                       
 def cluster_withsubsets(spike_table,reorder_clus=True):
     if reorder_clus: print "Cluster reordering not implemented!"

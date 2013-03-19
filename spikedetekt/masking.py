@@ -38,32 +38,19 @@ def get_float_mask(wave, channelmask, channelgraph, sdfactor):
     x = clip((z-zmin)/(zmax-zmin), 0, 1)
     #x = (z-zmin)/(zmax-zmin) #For use when actual values are desired (use together with a high value of ADDITIONAL_FLOAT_PENUMBRA)
     if Parameters['USE_INTERPOLATION']:
-        # the interpolation function should use the channelmask
-        
-            
+        # the interpolation function should use the channelmask            
         channelmask = add_penumbra(channelmask, channelgraph,
                                    Parameters['ADDITIONAL_FLOAT_PENUMBRA'])
-        #print channelmask
-        #print eval(Parameters['FLOAT_MASK_INTERPOLATION'])*channelmask    
-        
-                                       
         # and this function varies from 0 to 1 for x varying from 0 to 1
         return eval(Parameters['FLOAT_MASK_INTERPOLATION'])*channelmask
     else:
-        #print 'prechannelmask = ',channelmask
-        
         newchannelmask = channelmask.astype(float32)
         channelmaskdifference={}
         for j in range(Parameters['ADDITIONAL_FLOAT_PENUMBRA']):
             channelmaskdifference[j] =  (add_penumbra(channelmask, channelgraph,j+1)*1 -add_penumbra(channelmask, channelgraph,j)*1)
-            #print j, channelmaskdifference[j]
             channelmaskdifference[j] = channelmaskdifference[j].astype(float32)
             channelmaskdifference[j] = channelmaskdifference[j]/(2**(j+1))
-            #print type(channelmaskdifference[j])
-            #print 1/(2**(j+1))
-            #print j, channelmaskdifference[j]
             newchannelmask = newchannelmask+channelmaskdifference[j]
-        #print 'newchannelmask = ',newchannelmask    
         return newchannelmask    
             
   

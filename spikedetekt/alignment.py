@@ -57,7 +57,6 @@ def extract_wave(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
     n_ch = FilteredArr.shape[1]
     
     # Find peak sample and channel
-    # TODO: replace with weighted mean
     # TODO: argmin only works for negative threshold crossings
     PeakInd = FilteredArr[SampArr, ChArr].argmin()
     PeakSample, PeakChannel = SampArr[PeakInd], ChArr[PeakInd]
@@ -95,24 +94,6 @@ def interp_around(X_sc, s_fracpeak, s_before, s_after):
     new_s = np.arange(s_fracpeak-s_before, s_fracpeak+s_after, dtype=np.float32)
     f = interp1d(old_s, X_sc, bounds_error=True, kind='cubic', axis=0)
     return f(new_s)
-#    Out_sc2 = f(new_s)
-    # OLD METHOD: work channel by channel, which is very much slower
-    # However, the algorithm above for cubic interpolation is slightly
-    # different. The old code used cubic B-splines and the new code uses
-    # cubic splines. Not sure exactly what the difference is, but they give
-    # slightly different results. I don't see any reason to prefer the old
-    # algorithm though...
-#    Out_sc = np.empty((n_s,n_c),dtype=np.float32)
-#    for i_c in xrange(n_c):
-#        if kind == 'cubic':
-#            coeffs = cspline1d(X_sc[:,i_c])
-#            Out_sc[:,i_c] = cspline1d_eval(coeffs,
-#                                       newx=np.arange(s_fracpeak - s_before,s_fracpeak+s_after,dtype=np.float32))
-#        elif kind == "linear":
-#            Out_sc[:,i_c] = interp1d(np.arange(X_sc.shape[0]),X_sc[:,i_c],
-#                                     bounds_error=True,kind=kind)(np.arange(s_fracpeak - s_before,s_fracpeak+s_after,dtype=np.float32))
-#        else: raise Exception("kind must be 'linear' or 'cubic'")
-#    return Out_sc
 
 def interp_around_peak(X_sc, i_intpeak, c_peak, s_before, s_after):
     # Presumably this finds the coefficients a, b, c for ax^2+bx+c to fit a
@@ -195,16 +176,6 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
         else:
             X = UpsampledWavePlus
         s_fracpeak = 1.0*np.argmin(np.amin(X, axis=1))
-#    if False: # DEBUG peak finding
-#        from pylab import *
-#        subplot(211)
-#        plot(WavePlus)
-#        subplot(212)
-#        plot(UpsampledWavePlus)
-#        axvline(s_fracpeak)
-#        plot()
-#        show()
-#        exit()
     # s_fracpeak currently in coords of UpsampledWavePlus
     s_fracpeak = s_fracpeak/upsampling_factor
     # s_fracpeak now in coordinates of WavePlus
@@ -221,18 +192,5 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
     new_s = np.arange(s_peak-s_before, s_peak+s_after)+(s_fracpeak-s_peak)
     f = interp1d(old_s, WaveBlock, bounds_error=True, kind='cubic', axis=0)
     Wave = f(new_s)
-    
-#    if False: # DEBUG interpolation
-#        from pylab import *
-#        subplot(211)
-#        plot(old_s, WaveBlock[:, ChMask], '--')
-#        plot(new_s, Wave[:, ChMask], '-')
-#        axvline(s_fracpeak, ls='-')
-#        axvline(s_peak, ls='--')
-#        subplot(212)
-#        plot(Wave, c=(.8,)*3)
-#        plot(Wave[:, ChMask])
-#        show()
-#        exit()
     
     return Wave, s_peak, ChMask

@@ -10,10 +10,6 @@ from utils import switch_ext
 import os.path
 from parameters import Parameters
 
-#def maskindices(chans,nPCcomps)
-#    PCSmask = np.zero(nPCcomps*chans.shape[0],dtype=np.int) 
-
-
 #m chops n_samples into chunks according to chunk_size,overlap
 #m Overlap probably controls for the artifacts of filtering on the ends of the signal?
 def chunk_bounds(n_samples, chunk_size, overlap):
@@ -93,54 +89,22 @@ def spike_dtype():
 def klusters_files(table, basename, probe):
     N_CH,  FPC = eval('(N_CH, FPC)', Parameters)
     CM = table.cols.channel_mask[:] # shape (numspikes, numfeatures)
-#    print 'CM.shape =', CM.shape
     shanknum = np.zeros(CM.shape[0], dtype=int)
     for i in xrange(CM.shape[0]):
         M = CM[i, :]
-#        print 'M.shape =', M.shape
         j = M.nonzero()[0][0] # first nonzero element
-#        print 'j =', j
-#        print 'probe.channel_to_shank =', probe.channel_to_shank
         shanknum[i] = probe.channel_to_shank[j]
     for shank in probe.shanks_set:
         I = (shanknum==shank).nonzero()[0] # set of spike indices on given shank
-#        print 'I =', I
-#        print 'shank = ', shank
-#        print type(probe.channel_set[shank])
         C = np.array(sorted(list(probe.channel_set[shank])),dtype=int)
-#        print 'probe.channel_set[shank] = ', C
-#        print 'C.shape = ', C.shape
         write_clu(table.cols.clu[:][I], basename+'.clu.'+str(shank))
-#        G = table.cols.fet[:]
-#        print 'G.shape = ',G.shape
         F = table.cols.fet[:][I]
-#        print 'F.shape = ',F.shape
         L = F[:,C,:]
-#        print 'L.shape = ',L.shape
-#        H = F.reshape(F.shape[0],-1)
-#        print 'H.shape = ',H.shape
         write_fet(L.reshape(L.shape[0],-1),
                   basename+'.fet.'+str(shank),
                   samples=table.cols.time[:][I])
-#        print 'table.cols.time[:][I].shape = ',table.cols.time[:][I].shape          
         write_res(table.cols.time[:][I], basename+'.res.'+str(shank))
-        #wavey = table.cols.wave[:][I]
-#        print 'wavey.shape = ',wavey.shape
-        #wavey_chan = wavey[:,:,C]
-#        print 'wavey_chan.shape = ',wavey_chan.shape
-        #uwavey = table.cols.unfiltered_wave[:][I]
-#        print 'uwavey.shape = ',uwavey.shape
-        #uwavey_chan = uwavey[:,:,C]
-#        print 'uwavey_chan.shape = ',uwavey_chan.shape
-#        write_spk(table.cols.wave[:][I], basename+'.spk.'+str(shank))
-
-#        write_spk(wavey_chan, basename+'.spk.'+str(shank))
         write_spk_buffered(table,'wave', basename+'.spk.'+str(shank),indices=I,channels=C)
-
-#        write_spk(table.cols.unfiltered_wave[:][I], basename+'.uspk.'+str(shank))
-        
-#        write_spk(uwavey_chan, basename+'.uspk.'+str(shank))
-        
         write_spk_buffered(table,'unfiltered_wave', basename+'.uspk.'+str(shank), indices=I, channels=C)
 
         write_xml(probe,
@@ -158,28 +122,9 @@ def klusters_files(table, basename, probe):
 #        print 'Cmaskindices = ', Cmaskindices 
         G = table.cols.fet_mask[:][I]        
         Gf = table.cols.float_fet_mask[:][I]
-#        print 'Gf.shape = ',Gf.shape
-#        Gf = table.cols.fet_mask[:][I,C,:]          
         if Parameters['USE_FLOAT_MASKS']:
-#            write_mask(table.cols.float_fet_mask[:], basename+'.fmask.'+str(shank), fmt="%f")
             write_mask(Gf[:,Cmaskindices], basename+'.fmask.'+str(shank), fmt="%f")
         write_mask(G[:,Cmaskindices], basename+'.mask.'+str(shank))
-#        write_clu(table.cols.clu[:], basename+'.clu.'+str(shank))
-#        F = table.cols.fet[:]
-#        write_fet(F.reshape(F.shape[0], -1),
-#                  basename+'.fet.'+str(shank),
-#                  samples=table.cols.time[:])
-#        write_res(table.cols.time[:], basename+'.res.'+str(shank))
-#        write_spk(table.cols.wave[:], basename+'.spk.'+str(shank))
-#        write_spk(table.cols.unfiltered_wave[:], basename+'.uspk.'+str(shank))
-#        write_xml(n_ch=Parameters['N_CH'],
-#                  n_samp=Parameters['S_TOTAL'],
-#                  n_feat=Parameters['FPC'],
-#                  sample_rate=Parameters['SAMPLE_RATE'],
-#                  filepath=basename+'.xml')
-#        if Parameters['USE_FLOAT_MASKS']:
-#            write_mask(table.cols.float_fet_mask[:], basename+'.fmask.'+str(shank), fmt="%f")
-#        write_mask(table.cols.fet_mask[:], basename+'.mask.'+str(shank))
 
 def write_mask(mask, filename, fmt="%i"):
     fd = open(filename, 'w')
@@ -333,23 +278,6 @@ def indent_xml(elem, level=0):
             elem.tail = i
             
             
-def get_pars_from_xml(xmlpath):
-    assert os.path.exists(xmlpath)
-    root = ElementTree().parse(xmlpath)
-    acquisitionSystem = root.find('acquisitionSystem')
-    n_channels = int(acquisitionSystem.find('nChannels').text)
-    sample_rate = np.float32(acquisitionSystem.find('samplingRate').text)
-    return n_channels,sample_rate
-
-def get_pars_from_xml2(xmlpath):
-    root = ElementTree().parse(xmlpath)
-    n_channels = int(search_etree(root,"nChannels"))
-    sample_rate = float(search_etree(root,"samplingRate"))
-    s_total = int(search_etree(root,"nSamples"))
-    s_before = int(search_etree(root,"peakSampleIndex"))
-    s_after = s_total-s_before
-    return n_channels,sample_rate,s_before,s_after
-
 def walk_etree(root):
     yield root.tag,root.text
     for child in root.getchildren():
@@ -359,19 +287,3 @@ def walk_etree(root):
 def search_etree(root,the_tag):
     for tag,text in walk_etree(root):
         if tag==the_tag: return text
-
-def get_dat_pars(DatFileName,probe):
-    xmlpath = switch_ext(DatFileName,'xml')
-    if os.path.exists(xmlpath):
-        n_ch_dat,sample_rate = get_pars_from_xml(xmlpath)
-    else:
-        n_ch_dat,sample_rate = get_pars_from_prompt()
-        write_xml(probe,n_ch_dat,0,0,sample_rate,xmlpath)
-        print("writing parameters in xml file %s"%xmlpath)
-    return n_ch_dat,sample_rate
-                                          
-def get_pars_from_prompt():
-    print("Could not find xml file with parameters.")
-    n_ch_dat = input("How many channels in .dat file?\t")
-    sample_rate = input("What is the sample rate?\t")
-    return n_ch_dat,sample_rate
