@@ -3,7 +3,7 @@ SpikeDetekt
 
 This is a program for spike detection. It is in development.
 
-Contact: Kenneth Harris (kenneth@cortexlab.net), Shabnam Kadir (shabnam@cortexlab.net)
+Contact: Kenneth Harris (firstname at cortexlab.net), Shabnam Kadir (firstname at cortexlab.net)
 
 Quick Start Guide for electrophysiologists (will become more comprehensive with time):
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
