@@ -43,7 +43,7 @@ SHOW_PCS = False # show principal components
 
 # Options for masking
 USE_FLOAT_MASKS = True
-USE_INTERPOLATION = False
+USE_INTERPOLATION = True
 ADDITIONAL_FLOAT_PENUMBRA = 2 # adds some more penumbra
 FLOAT_MASK_THRESH_SD = (0, 4.5) # (min, max), mask 0 at min, 1 at max
 FLOAT_MASK_INTERPOLATION = 'x' # f(x) for x in [0,1], f(0)=0, f(1)=1
