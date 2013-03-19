@@ -10,7 +10,7 @@ Used like this::
         progress.update(percentcomplete)
     progress.finish()
 
-It will give a progress report every 10 seconds by default.
+It will give a progress report every 60 seconds by default.
     
 Adapted and simplified from progressreporting.py in the Brian neural network
 simulator (http://briansimulator.org).
@@ -73,7 +73,7 @@ class ProgressReporter(object):
         the optional extrainfo parameters is a string giving extra information
         about the progress.        
     '''
-    def __init__(self, period=10.0):
+    def __init__(self, period=60.0):
         self.period = float(period)
         self.start() # just in case the user forgets to call start()
 
