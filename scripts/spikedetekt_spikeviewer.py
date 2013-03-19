@@ -1,7 +1,7 @@
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from pylab import *
 import wx
-from caton.plotting import SpikeTable
+from spikedetekt.plotting import SpikeTable
 import parser
 
 help_text = '''

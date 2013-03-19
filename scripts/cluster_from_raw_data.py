@@ -5,8 +5,8 @@ TODO: documentation
 import sys, os, shutil
 from optparse import OptionParser, Option
 from os.path import abspath, dirname, join
-from SpiKeDeteKt.core import classify_from_raw_data
-from SpiKeDeteKt.parameters import Parameters
+from spikedetekt.core import classify_from_raw_data
+from spikedetekt.parameters import Parameters
 
 usage = """
 This is the main script that you use to spike-sort your data. Just make the
