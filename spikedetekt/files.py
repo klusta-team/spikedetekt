@@ -38,24 +38,50 @@ def chunk_bounds(n_samples, chunk_size, overlap):
     keep_end = s_end
     yield s_start,s_end,keep_start,keep_end   
 
-def chunks(fd, n_ch_dat, ChannelsToUse, n_samples):
+
+def chunks(DatFileNames, n_ch_dat, ChannelsToUse):
     '''
     Yields the chunks from the data file
     '''
     CHUNK_SIZE = Parameters['CHUNK_SIZE']
     CHUNK_OVERLAP = Parameters['CHUNK_OVERLAP']
     DTYPE = Parameters['DTYPE']
-    for s_start, s_end, keep_start, keep_end in chunk_bounds(n_samples,
+    dtype_size = np.nbytes[DTYPE]
+    n_samples = [num_samples(DatFileName,
+                             n_ch_dat,
+                             n_bytes=dtype_size) for DatFileName in DatFileNames]
+    n_samples = np.array(n_samples, dtype=int)
+    offsets = np.hstack((0, np.cumsum(n_samples)))
+    total_n_samples = np.sum(n_samples)
+    fileobjs = [open(DatFileName, 'rb') for DatFileName in DatFileNames]
+    for s_start, s_end, keep_start, keep_end in chunk_bounds(total_n_samples,
                                                              CHUNK_SIZE,
                                                              CHUNK_OVERLAP):
-        # Load next chunk from file
-        DatChunk = np.fromfile(fd, dtype=DTYPE,
-                               count=(s_end-s_start)*n_ch_dat)
-        DatChunk = DatChunk.reshape(s_end-s_start, n_ch_dat)
-        DatChunk = DatChunk[:, ChannelsToUse]
-        DatChunk = DatChunk.astype(np.float32)
-        fd.seek(fd.tell()-CHUNK_OVERLAP*n_ch_dat*np.nbytes[DTYPE])
+        # read from sample s_start to sample s_end, i.e. bytes from
+        # s_start*n_ch_dat*sizeof(DTYPE) to s_end*n_ch_dat*sizeof(DTYPE)
+        # but we are reading from a virtual concatenated file
+        pieces = []
+        for fd, f_start, f_end in zip(fileobjs, offsets[:-1], offsets[1:]):
+            # find the intersection of [f_start, f_end] and [s_start, s_end]
+            i_start = max(f_start, s_start)
+            i_end = min(f_end, s_end)
+            # intersection is nonzero if i_end>i_start only
+            if i_end>i_start:
+                # start and end of intersection as an offset into the file in
+                # samples
+                o_start = i_start-f_start
+                o_end = i_end-f_start
+                # start of the data in bytes
+                fd.seek(o_start*n_ch_dat*dtype_size, 0)
+                DatChunk = np.fromfile(fd, dtype=DTYPE,
+                                       count=(o_end-o_start)*n_ch_dat)
+                DatChunk = DatChunk.reshape(o_end-o_start, n_ch_dat)
+                DatChunk = DatChunk[:, ChannelsToUse]
+                DatChunk = DatChunk.astype(np.float32)
+                pieces.append(DatChunk)
+        DatChunk = np.vstack(pieces)
         yield DatChunk, s_start, s_end, keep_start, keep_end
+
 
 def get_chunk_for_thresholding(fd, n_ch_dat, ChannelsToUse, n_samples):
     '''
@@ -132,15 +158,13 @@ def write_mask(mask, filename, fmt="%i"):
     np.savetxt(fd, mask, fmt=fmt)
     fd.close()
 
-def processed_basename(DatFileName, ProbeFileName):
-    return "%s_%s"%(basename_noext(DatFileName),
-                    basename_noext(ProbeFileName))
-       
-def num_samples(FileName, n_ch_dat, n_bytes=2):
-    total_bytes = os.path.getsize(FileName)
+def num_samples(FileNames, n_ch_dat, n_bytes=2):
+    if isinstance(FileNames, str):
+        FileNames = [FileNames]
+    total_bytes = sum(os.path.getsize(FileName) for FileName in FileNames)
     if total_bytes % (n_ch_dat*n_bytes) != 0:
-        raise Exception("Size of file %s is not consistent with %i channels and %i bytes"%(FileName, n_ch_dat, n_bytes))
-    return os.path.getsize(FileName)//n_ch_dat//n_bytes
+        raise Exception("Size of file(s) %s not consistent with %i channels and %i bytes"%(', '.join(FileNames), n_ch_dat, n_bytes))
+    return total_bytes//(n_ch_dat*n_bytes)
 
 def write_clu(clus, filepath):
     """writes cluster cluster assignments to text file readable by klusters and neuroscope.

@@ -13,8 +13,9 @@ DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
 #NCHANNELS = 32
 #SAMPLERATE = 20000 # in Hertz
 
-# Output directory
-OUTPUT_DIR = '.'
+# Output directory, files are inserted in OUTPUT_DIR/OUTPUT_BASENAME
+OUTPUT_DIR = '.' # the output directory
+OUTPUT_BASENAME = None # the base filename for created directories, use concatenation if None
 
 # Thresholding
 USE_SINGLE_THRESHOLD = False # use a single threshold for all channels

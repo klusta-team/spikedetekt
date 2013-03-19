@@ -11,7 +11,7 @@ from graphs import contig_segs, complete_if_none, add_penumbra
 from utils import indir, basename_noext, get_padded, switch_ext
 from floodfill import connected_components
 from features import compute_pcs, reget_features, project_features
-from files import processed_basename, num_samples, spike_dtype, klusters_files,\
+from files import num_samples, spike_dtype, klusters_files,\
                   get_chunk_for_thresholding, chunks
 from filtering import apply_filtering, get_filter_params
 from progressbar import ProgressReporter
@@ -40,14 +40,15 @@ def set_globals_samples(sample_rate):
 ######## High-level scripts ########
 ####################################
 
-def spike_detection_job(DatFileName, ProbeFileName, max_spikes=None,
-                        output_dir=None, clu_dir=None):
+def spike_detection_job(DatFileNames, ProbeFileName, max_spikes=None,
+                        output_dir='.'):
     """
     Top level function that starts a data processing job.
     """
-    if not os.path.exists(DatFileName):
-        raise Exception("Dat file %s does not exist"%DatFileName)
-    DatFileName = os.path.abspath(DatFileName)
+    for DatFileName in DatFileNames:
+        if not os.path.exists(DatFileName):
+            raise Exception("Dat file %s does not exist"%DatFileName)
+    DatFileNames = [os.path.abspath(DatFileName) for DatFileName in DatFileNames]
     
     probe = probes.Probe(ProbeFileName)
     
@@ -56,21 +57,21 @@ def spike_detection_job(DatFileName, ProbeFileName, max_spikes=None,
     set_globals_samples(sample_rate)
     Parameters['CHUNK_OVERLAP'] = int(sample_rate*Parameters['CHUNK_OVERLAP_SECONDS'])
     
-    DatDir = os.path.abspath(os.path.dirname(DatFileName))
-    
     Parameters['N_CH'] = probe.num_channels
     
-    basename = basename_noext(DatFileName)
-    basenamefolder = processed_basename(DatFileName, ProbeFileName)
+    if Parameters['OUTPUT_BASENAME'] is None:
+        basename = '_'.join([basename_noext(DatFileName) for DatFileName in DatFileNames])
+        basenamefolder = basename+'_'+basename_noext(ProbeFileName)
+    else:
+        basename = basenamefolder = Parameters['OUTPUT_BASENAME']
         
-    OutDir = join(output_dir, basenamefolder) if output_dir else join(DatDir, basenamefolder)
-    if clu_dir is not None: clu_dir = os.path.abspath(clu_dir)
+    OutDir = join(output_dir, basenamefolder)
     with indir(OutDir):    
         # Create a log file
         GlobalVariables['log_fd'] = open(basename+'.log', 'w')    
         
         Channels_dat = np.arange(probe.num_channels)
-        spike_detection_from_raw_data(basename, DatFileName, n_ch_dat,
+        spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat,
                                       Channels_dat, probe.channel_graph,
                                       probe, max_spikes)
         
@@ -79,7 +80,7 @@ def spike_detection_job(DatFileName, ProbeFileName, max_spikes=None,
             log_message('WARNINGS ENCOUNTERED: '+str(numwarn)+', check log file.')
             
 
-def spike_detection_from_raw_data(basename, DatFileName, n_ch_dat, Channels_dat,
+def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat,
                                   ChannelGraph, probe, max_spikes):
     """
     Filter, detect, extract from raw data.
@@ -96,7 +97,7 @@ def spike_detection_from_raw_data(basename, DatFileName, n_ch_dat, Channels_dat,
     
     for (USpk, Spk, PeakSample,
          ChannelMask, FloatChannelMask) in extract_spikes(basename,
-                                                          DatFileName,
+                                                          DatFileNames,
                                                           n_ch_dat,
                                                           Channels_dat,
                                                           ChannelGraph,
@@ -146,7 +147,7 @@ def spike_detection_from_raw_data(basename, DatFileName, n_ch_dat, Channels_dat,
 #m PeakSample is the position of the peak (e.g. 435688)
 #m ST (to the best of my understanding) is a bool array (no. of channels long) which shows on which 
 #m                                      channels the threshold was crossed (?)
-def extract_spikes(basename, DatFileName, n_ch_dat, ChannelsToUse, ChannelGraph,
+def extract_spikes(basename, DatFileNames, n_ch_dat, ChannelsToUse, ChannelGraph,
                    max_spikes=None):
     # some global variables we use
     CHUNK_SIZE = Parameters['CHUNK_SIZE']
@@ -159,7 +160,6 @@ def extract_spikes(basename, DatFileName, n_ch_dat, ChannelsToUse, ChannelGraph,
     S_AFTER = Parameters['S_AFTER']
     THRESH_SD = Parameters['THRESH_SD']
     
-    n_samples = num_samples(DatFileName, n_ch_dat)
     # filter coefficents for the high pass filtering
     filter_params = get_filter_params()
 
@@ -169,10 +169,12 @@ def extract_spikes(basename, DatFileName, n_ch_dat, ChannelsToUse, ChannelGraph,
     if Parameters['WRITE_FIL_FILE']:
         fil_fd = open(basename+'.fil', 'wb')
 
-    with open(DatFileName, 'rb') as fd:
+    # Just use first dat file for getting the thresholding data
+    with open(DatFileNames[0], 'rb') as fd:
         # Use 5 chunks to figure out threshold
         DatChunk = get_chunk_for_thresholding(fd, n_ch_dat, ChannelsToUse,
-                                              n_samples)
+                                              num_samples(DatFileNames[0],
+                                                          n_ch_dat))
         FilteredChunk = apply_filtering(filter_params, DatChunk)
         # .6745 converts median to standard deviation
         if Parameters['USE_SINGLE_THRESHOLD']:
@@ -180,57 +182,60 @@ def extract_spikes(basename, DatFileName, n_ch_dat, ChannelsToUse, ChannelGraph,
         else:
             ThresholdSDFactor = np.median(np.abs(FilteredChunk), axis=0)/.6745
         Threshold = ThresholdSDFactor*THRESH_SD
+    
+    n_samples = num_samples(DatFileNames, n_ch_dat)
+    
+    spike_count = 0
+    for (DatChunk, s_start, s_end,
+         keep_start, keep_end) in chunks(DatFileNames, n_ch_dat, ChannelsToUse):
+        ############## FILTERING ########################################
+        FilteredChunk = apply_filtering(filter_params, DatChunk)
         
-        spike_count = 0
-        for (DatChunk, s_start, s_end,
-             keep_start, keep_end) in chunks(fd, n_ch_dat, ChannelsToUse,
-                                             n_samples):
-            ############## FILTERING ########################################
-            FilteredChunk = apply_filtering(filter_params, DatChunk)
-            
-            # write filtered output to file
-            if Parameters['WRITE_FIL_FILE']:
-                if s_end>keep_end: #m writing out the high-pass filtered data
-                    FilteredChunkInt = FilteredChunk[keep_start-s_start:keep_end-s_end]
-                    FilteredChunkInt = np.int16(FilteredChunkInt)
-                else: #m we're in the end
-                    FilteredChunkInt = np.int16(FilteredChunk[keep_start-s_start:])
-                fil_fd.write(FilteredChunkInt) #m
+        # write filtered output to file
+        if Parameters['WRITE_FIL_FILE']:
+            if s_end>keep_end: #m writing out the high-pass filtered data
+                FilteredChunkInt = FilteredChunk[keep_start-s_start:keep_end-s_end]
+                FilteredChunkInt = np.int16(FilteredChunkInt)
+            else: #m we're in the end
+                FilteredChunkInt = np.int16(FilteredChunk[keep_start-s_start:])
+            fil_fd.write(FilteredChunkInt) #m
 
-            ############## THRESHOLDING #####################################
-            if Parameters['DETECT_POSITIVE']:
-                BinaryChunk = np.abs(FilteredChunk)>Threshold
-            else:
-                BinaryChunk = (FilteredChunk<-Threshold)
-            BinaryChunk = BinaryChunk.astype(np.int8)
-            ############### FLOOD FILL  ######################################
-            ChannelGraphToUse = complete_if_none(ChannelGraph, N_CH)
-            IndListsChunk = connected_components(BinaryChunk,
-                                ChannelGraphToUse, S_JOIN_CC)
-            ############## ALIGN AND INTERPOLATE WAVES #######################
-            nextbits = []
-            for IndList in IndListsChunk:
-                wave, s_peak, cm = extract_wave(IndList, FilteredChunk,
-                                                S_BEFORE, S_AFTER, N_CH,
-                                                s_start)
-                s_offset = s_start+s_peak
-                if keep_start<=s_offset<keep_end:
-                    spike_count += 1
-                    nextbits.append((wave, s_offset, cm))
-            # and return them in time sorted order
-            nextbits.sort(key=lambda (wave, s, cm): s)
-            for wave, s, cm in nextbits:
-                uwave = get_padded(DatChunk, int(s)-S_BEFORE-s_start,
-                                   int(s)+S_AFTER-s_start).astype(np.int32)
-                cm = add_penumbra(cm, ChannelGraphToUse,
-                                  Parameters['PENUMBRA_SIZE'])
-                fcm = get_float_mask(wave, cm, ChannelGraphToUse,
-                                     ThresholdSDFactor)
-                yield uwave, wave, s, cm, fcm
-            progress_bar.update(float(s_end)/n_samples,
-                '%d/%d samples, %d spikes found'%(s_end, n_samples, spike_count))
-            if max_spikes is not None and spike_count>=max_spikes:
-                break
-        progress_bar.finish()
+        ############## THRESHOLDING #####################################
+        if Parameters['DETECT_POSITIVE']:
+            BinaryChunk = np.abs(FilteredChunk)>Threshold
+        else:
+            BinaryChunk = (FilteredChunk<-Threshold)
+        BinaryChunk = BinaryChunk.astype(np.int8)
+        ############### FLOOD FILL  ######################################
+        ChannelGraphToUse = complete_if_none(ChannelGraph, N_CH)
+        IndListsChunk = connected_components(BinaryChunk,
+                            ChannelGraphToUse, S_JOIN_CC)
+        ############## ALIGN AND INTERPOLATE WAVES #######################
+        nextbits = []
+        for IndList in IndListsChunk:
+            wave, s_peak, cm = extract_wave(IndList, FilteredChunk,
+                                            S_BEFORE, S_AFTER, N_CH,
+                                            s_start)
+            s_offset = s_start+s_peak
+            if keep_start<=s_offset<keep_end:
+                spike_count += 1
+                nextbits.append((wave, s_offset, cm))
+        # and return them in time sorted order
+        nextbits.sort(key=lambda (wave, s, cm): s)
+        for wave, s, cm in nextbits:
+            uwave = get_padded(DatChunk, int(s)-S_BEFORE-s_start,
+                               int(s)+S_AFTER-s_start).astype(np.int32)
+            cm = add_penumbra(cm, ChannelGraphToUse,
+                              Parameters['PENUMBRA_SIZE'])
+            fcm = get_float_mask(wave, cm, ChannelGraphToUse,
+                                 ThresholdSDFactor)
+            yield uwave, wave, s, cm, fcm
+        progress_bar.update(float(s_end)/n_samples,
+            '%d/%d samples, %d spikes found'%(s_end, n_samples, spike_count))
+        if max_spikes is not None and spike_count>=max_spikes:
+            break
+    
+    progress_bar.finish()
+    
     if Parameters['WRITE_FIL_FILE']:
-        fil_fd.close() #m  
+        fil_fd.close()  
