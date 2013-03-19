@@ -6,10 +6,12 @@ DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
 # see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
 
 # Probe file (no default value provided)
-# PROBE_FILE = 'probe_filename.py'
+#PROBE_FILE = 'probe_filename.py'
 
 # Raw data files (no default values provided)
-# RAW_DATA_FILES = ['file1.dat', 'file2.dat']
+#RAW_DATA_FILES = ['file1.dat', 'file2.dat']
+#NCHANNELS = 32
+#SAMPLERATE = 20000 # in Hertz
 
 # Output directory
 OUTPUT_DIR = '.'

@@ -1,7 +1,7 @@
 from __future__ import with_statement
 import os, sys, numpy
 
-scripts = ["scripts/cluster_from_raw_data.py",
+scripts = ["scripts/detektspikes.py",
            "scripts/spikedetekt_spikeviewer.py",
            ]
 
@@ -14,6 +14,6 @@ setup(name="spikedetekt",
       author_email="kenneth@cortexlab.net",
       description="Spike sorting for multi-site probes",
       license="GPL3",
-      url="http://klustakwik.sourceforge.net",
+      url="https://github.com/klusta-team/spikedetekt",
       packages=["spikedetekt"],
       )

@@ -2,7 +2,7 @@
 '''
 Main script file for SpikeDetekt
 '''
-from spikedetekt.core import classify_from_raw_data
+from spikedetekt.core import spike_detection_job
 from spikedetekt.parameters import Parameters
 import sys
 import os
@@ -43,8 +43,13 @@ if __name__=='__main__':
         if not os.path.exists(file):
             print 'Raw data file %s does not exist.' % file
             exit()
+    
+    # Check other options are present in parameters file
+    if not 'NCHANNELS' in Parameters or not 'SAMPLERATE' in Parameters:
+        print 'Parameters file needs NCHANNELS and SAMPLERATE options.'
+        exit()
             
-    classify_from_raw_data(raw_data_files[0], probe_file,
-                           max_spikes=Parameters['MAX_SPIKES'],
-                           output_dir=Parameters['OUTPUT_DIR'])
+    spike_detection_job(raw_data_files[0], probe_file,
+                        max_spikes=Parameters['MAX_SPIKES'],
+                        output_dir=Parameters['OUTPUT_DIR'])
     

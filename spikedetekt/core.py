@@ -6,8 +6,7 @@ from xml.etree.ElementTree import ElementTree
 import re, tables, json, os
 
 import probes
-from files import get_pars_from_xml, get_pars_from_prompt, get_dat_pars, \
-                   write_fet
+from files import write_fet
 from graphs import contig_segs, complete_if_none, add_penumbra
 from utils import indir, basename_noext, get_padded, switch_ext
 from floodfill import connected_components
@@ -37,27 +36,12 @@ def set_globals_samples(sample_rate):
     exec 'S_TOTAL = S_BEFORE + S_AFTER' in Parameters
     exec 'S_JOIN_CC = T_JOIN_CC*SAMPLE_RATE' in Parameters
     
-def print_params():
-    s = ''' 
-    PARAMETERS
-    ----------
-    T_BEFORE: {before}
-    T_AFTER: {after}
-    F_LOW (Hz): {low}
-    THRESH_SD: {thresh}
-    '''.format(
-        before=Parameters['T_BEFORE'],
-        after=Parameters['T_AFTER'],
-        low=Parameters['F_LOW'],
-        thresh=Parameters['THRESH_SD'])
-    log_message(s, multiline=True)
-    
 ####################################
 ######## High-level scripts ########
 ####################################
 
-def classify_from_raw_data(DatFileName, ProbeFileName, max_spikes=None,
-                           output_dir=None, clu_dir=None):
+def spike_detection_job(DatFileName, ProbeFileName, max_spikes=None,
+                        output_dir=None, clu_dir=None):
     """
     Top level function that starts a data processing job.
     """
@@ -67,7 +51,8 @@ def classify_from_raw_data(DatFileName, ProbeFileName, max_spikes=None,
     
     probe = probes.Probe(ProbeFileName)
     
-    n_ch_dat,sample_rate = get_dat_pars(DatFileName,probe)
+    n_ch_dat = Parameters['NCHANNELS']
+    sample_rate = Parameters['SAMPLERATE']
     set_globals_samples(sample_rate)
     
     DatDir = os.path.abspath(os.path.dirname(DatFileName))
@@ -82,21 +67,21 @@ def classify_from_raw_data(DatFileName, ProbeFileName, max_spikes=None,
     with indir(OutDir):    
         # Create a log file
         GlobalVariables['log_fd'] = open(basename+'.log', 'w')    
-        print_params()
         
         Channels_dat = np.arange(probe.num_channels)
-        cluster_from_raw_data(basename, DatFileName, n_ch_dat, Channels_dat,
-                              probe.channel_graph, probe, max_spikes)
+        spike_detection_from_raw_data(basename, DatFileName, n_ch_dat,
+                                      Channels_dat, probe.channel_graph,
+                                      probe, max_spikes)
         
         numwarn = GlobalVariables['warnings']
         if numwarn:
             log_message('WARNINGS ENCOUNTERED: '+str(numwarn)+', check log file.')
             
 
-def cluster_from_raw_data(basename, DatFileName, n_ch_dat, Channels_dat,
-                          ChannelGraph, probe, max_spikes):
+def spike_detection_from_raw_data(basename, DatFileName, n_ch_dat, Channels_dat,
+                                  ChannelGraph, probe, max_spikes):
     """
-    Filter, detect, extract, and cluster on raw data.
+    Filter, detect, extract from raw data.
     """
     ### Detect spikes. For each detected spike, send it to spike writer, which
     ### writes it to a spk file. List of times is small (memorywise) so we just

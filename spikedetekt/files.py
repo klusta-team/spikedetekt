@@ -278,23 +278,6 @@ def indent_xml(elem, level=0):
             elem.tail = i
             
             
-def get_pars_from_xml(xmlpath):
-    assert os.path.exists(xmlpath)
-    root = ElementTree().parse(xmlpath)
-    acquisitionSystem = root.find('acquisitionSystem')
-    n_channels = int(acquisitionSystem.find('nChannels').text)
-    sample_rate = np.float32(acquisitionSystem.find('samplingRate').text)
-    return n_channels,sample_rate
-
-def get_pars_from_xml2(xmlpath):
-    root = ElementTree().parse(xmlpath)
-    n_channels = int(search_etree(root,"nChannels"))
-    sample_rate = float(search_etree(root,"samplingRate"))
-    s_total = int(search_etree(root,"nSamples"))
-    s_before = int(search_etree(root,"peakSampleIndex"))
-    s_after = s_total-s_before
-    return n_channels,sample_rate,s_before,s_after
-
 def walk_etree(root):
     yield root.tag,root.text
     for child in root.getchildren():
@@ -304,19 +287,3 @@ def walk_etree(root):
 def search_etree(root,the_tag):
     for tag,text in walk_etree(root):
         if tag==the_tag: return text
-
-def get_dat_pars(DatFileName,probe):
-    xmlpath = switch_ext(DatFileName,'xml')
-    if os.path.exists(xmlpath):
-        n_ch_dat,sample_rate = get_pars_from_xml(xmlpath)
-    else:
-        n_ch_dat,sample_rate = get_pars_from_prompt()
-        write_xml(probe,n_ch_dat,0,0,sample_rate,xmlpath)
-        print("writing parameters in xml file %s"%xmlpath)
-    return n_ch_dat,sample_rate
-                                          
-def get_pars_from_prompt():
-    print("Could not find xml file with parameters.")
-    n_ch_dat = input("How many channels in .dat file?\t")
-    sample_rate = input("What is the sample rate?\t")
-    return n_ch_dat,sample_rate
