@@ -45,6 +45,7 @@ UPSAMPLING_FACTOR = 10 # used for aligning waves
 
 # Options for features
 FPC = 3 # Features per channel
+PCA_MAXWAVES = 10000 # number of waves to use to extract principal components
 SHOW_PCS = False # show principal components
 
 # Options for masking

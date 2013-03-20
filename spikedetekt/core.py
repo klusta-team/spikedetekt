@@ -4,6 +4,7 @@ from scipy.stats import rv_discrete
 from scipy.stats.mstats import mquantiles
 from xml.etree.ElementTree import ElementTree
 import re, tables, json, os, h5py
+from itertools import izip
 
 import probes
 from files import write_fet
@@ -11,7 +12,7 @@ from graphs import contig_segs, complete_if_none, add_penumbra
 from utils import indir, basename_noext, get_padded, switch_ext
 from floodfill import connected_components
 from features import compute_pcs, reget_features, project_features
-from files import (num_samples, spike_dtype, klusters_files,
+from files import (num_samples, klusters_files,
                    get_chunk_for_thresholding, chunks, shank_description,
                    waveform_description)
 from filtering import apply_filtering, get_filter_params
@@ -87,11 +88,7 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
     ### writes it to a spk file. List of times is small (memorywise) so we just
     ### store the list and write it later.
 
-    hdf5file = tables.openFile(basename+".h5", "w")
-    spike_table = hdf5file.createTable("/", "SpikeTable_temp",
-                                       spike_dtype())
     np.savetxt("dat_channels.txt", Channels_dat, fmt="%i")
-    hdf5file.createArray("/", "DatChannels", Channels_dat)
     
     # Create HDF5 files
     h5s = {}
@@ -146,12 +143,6 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
                                                           ChannelGraph,
                                                           max_spikes,
                                                           ):
-        spike_table.row["unfiltered_wave"] = USpk
-        spike_table.row["wave"] = Spk
-        spike_table.row["time"] = PeakSample
-        spike_table.row["channel_mask"] = ChannelMask
-        spike_table.row["float_channel_mask"] = FloatChannelMask
-        spike_table.row.append()
         # what shank are we in?
         nzc, = ChannelMask.nonzero()
         shank = probe.channel_to_shank[nzc[0]]
@@ -168,35 +159,24 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
         t.row['unfiltered_wave'] = USpk[:, channel_list]
         t.row.append()
         
-    spike_table.flush()
+    #spike_table.flush()
     for h5 in h5s.values():
         h5.flush()
 
-    ### Feature extraction on spikes    
-    PC_3s = reget_features(spike_table.cols.wave[:10000])
-    for row in spike_table: 
-        row["fet"] = project_features(PC_3s, row["wave"])
-        fet_mask = np.hstack((np.repeat(row["channel_mask"],
-                                        Parameters['FPC']),
-                              [0])) # 0 is added for time feature
-        row["fet_mask"] = fet_mask
-        float_fet_mask = np.hstack((np.repeat(row["float_channel_mask"],
-                                              Parameters['FPC']),
-                                    [0])) # 0 is added for time feature
-        row["float_fet_mask"] = float_fet_mask
-        row.update()
+    # Feature extraction
+    for shank in probe.shanks_set:
+        X = shank_table['waveforms', shank].cols.wave[:Parameters['PCA_MAXWAVES']]
+        PC_3s = reget_features(X)
+        for sd_row, w_row in izip(shank_table['spikedetekt', shank],
+                                  shank_table['waveforms', shank]):
+            f = project_features(PC_3s, w_row['wave'])
+            sd_row['features'] = np.hstack((f.flatten(), sd_row['time']))
+            sd_row.update()
             
-    #m write out all the output files
-    spike_table.flush()
-    klusters_files(spike_table, basename, probe)
+    main_h5.flush()
+            
+    klusters_files(h5s, shank_table, basename, probe)
 
-    ### And use batch clustering procedure (EM) to get clusters.
-    #m CluArr is a 1D array containing the cluster to which every spike is assigned
-    if Parameters['DO_GLOBAL_CLUSTERING']:
-        CluArr = cluster_withsubsets(spike_table,
-                                     Parameters['SORT_CLUS_BY_CHANNEL'])
-
-    hdf5file.close()
     for h5 in h5s.values():
         h5.close()
                 
