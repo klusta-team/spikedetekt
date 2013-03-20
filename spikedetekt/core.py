@@ -125,7 +125,9 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
         parameters_group = h5.createGroup(metadata_group, 'parameters')
         for k, v in Parameters.items():
             if not k.startswith('_'):
-                if isinstance(v, (int, float)):
+                if isinstance(v, bool):
+                    r = int(v)
+                elif isinstance(v, (int, float)):
                     r = v
                 else:
                     r = repr(v)
@@ -159,7 +161,6 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
         t.row['unfiltered_wave'] = USpk[:, channel_list]
         t.row.append()
         
-    #spike_table.flush()
     for h5 in h5s.values():
         h5.flush()
 
