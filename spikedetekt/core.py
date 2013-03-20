@@ -40,8 +40,7 @@ def set_globals_samples(sample_rate):
 ######## High-level scripts ########
 ####################################
 
-def spike_detection_job(DatFileNames, ProbeFileName, max_spikes=None,
-                        output_dir='.'):
+def spike_detection_job(DatFileNames, ProbeFileName, output_dir, output_name):
     """
     Top level function that starts a data processing job.
     """
@@ -59,11 +58,9 @@ def spike_detection_job(DatFileNames, ProbeFileName, max_spikes=None,
     
     Parameters['N_CH'] = probe.num_channels
     
-    if Parameters['OUTPUT_BASENAME'] is None:
-        basename = '_'.join([basename_noext(DatFileName) for DatFileName in DatFileNames])
-        basenamefolder = basename+'_'+basename_noext(ProbeFileName)
-    else:
-        basename = basenamefolder = Parameters['OUTPUT_BASENAME']
+    max_spikes = Parameters['MAX_SPIKES']
+    
+    basename = basenamefolder = output_name
         
     OutDir = join(output_dir, basenamefolder)
     with indir(OutDir):    

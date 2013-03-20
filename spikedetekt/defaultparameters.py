@@ -6,16 +6,16 @@ DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
 # see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
 
 # Probe file (no default value provided)
-#PROBE_FILE = 'probe_filename.py'
+#PROBE_FILE = 'probe_filename.probe'
 
 # Raw data files (no default values provided)
 #RAW_DATA_FILES = ['file1.dat', 'file2.dat']
 #NCHANNELS = 32
 #SAMPLERATE = 20000 # in Hertz
 
-# Output directory, files are inserted in OUTPUT_DIR/OUTPUT_BASENAME
-OUTPUT_DIR = '.' # the output directory
-OUTPUT_BASENAME = None # the base filename for created directories, use concatenation if None
+# Output directory, files are inserted in OUTPUT_DIR/OUTPUT_NAME
+OUTPUT_DIR = None # the output directory, use params directory if None
+OUTPUT_NAME = None # the filename for created directories, use params filename if None
 
 # Thresholding
 USE_SINGLE_THRESHOLD = False # use a single threshold for all channels
