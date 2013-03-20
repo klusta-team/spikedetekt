@@ -3,7 +3,7 @@ import itertools as it, numpy as np, scipy.signal as signal
 from scipy.stats import rv_discrete
 from scipy.stats.mstats import mquantiles
 from xml.etree.ElementTree import ElementTree
-import re, tables, json, os
+import re, tables, json, os, h5py
 
 import probes
 from files import write_fet
@@ -11,8 +11,9 @@ from graphs import contig_segs, complete_if_none, add_penumbra
 from utils import indir, basename_noext, get_padded, switch_ext
 from floodfill import connected_components
 from features import compute_pcs, reget_features, project_features
-from files import num_samples, spike_dtype, klusters_files,\
-                  get_chunk_for_thresholding, chunks
+from files import (num_samples, spike_dtype, klusters_files,
+                   get_chunk_for_thresholding, chunks, shank_description,
+                   waveform_description)
 from filtering import apply_filtering, get_filter_params
 from progressbar import ProgressReporter
 from alignment import extract_wave
@@ -92,21 +93,84 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
     np.savetxt("dat_channels.txt", Channels_dat, fmt="%i")
     hdf5file.createArray("/", "DatChannels", Channels_dat)
     
+    # Create HDF5 files
+    h5s = {}
+    for n in ['main', 'waves']:
+        h5s[n] = tables.openFile(basename+'.'+n+'.h5', 'w')
+    for n in ['raw', 'high', 'low']:
+        if Parameters['RECORD_'+n.upper()]:
+            h5s[n] = tables.openFile(basename+'.'+n+'.h5', 'w')
+    main_h5 = h5s['main']
+    # Shanks groups
+    shanks_group = {}
+    shank_group = {}
+    shank_table = {}
+    for k in ['main', 'waves']:
+        h5 = h5s[k]
+        shanks_group[k] = h5.createGroup('/', 'shanks')
+        for i in probe.shanks_set:
+            shank_group[k, i] = h5.createGroup(shanks_group[k], 'shank_'+str(i))
+    # waveform data for wave file
+    for i in probe.shanks_set:
+        shank_table['waveforms', i] = h5s['waves'].createTable(
+            shank_group['waves', i], 'waveforms',
+            waveform_description(len(probe.channel_set[i])))
+    # spikedetekt data for main file, and links to waveforms
+    for i in probe.shanks_set:
+        shank_table['spikedetekt', i] = main_h5.createTable(shank_group['main', i],
+            'spikedetekt', shank_description(len(probe.channel_set[i])))
+        main_h5.createExternalLink(shank_group['main', i], 'waveforms', 
+                                   shank_table['waveforms', i])
+    # Metadata
+    n_samples = np.array([num_samples(DatFileName, n_ch_dat) for DatFileName in DatFileNames])
+    for k, h5 in h5s.items():
+        metadata_group = h5.createGroup('/', 'metadata')
+        parameters_group = h5.createGroup(metadata_group, 'parameters')
+        for k, v in Parameters.items():
+            if not k.startswith('_'):
+                if isinstance(v, (int, float)):
+                    r = v
+                else:
+                    r = repr(v)
+                h5.setNodeAttr(parameters_group, k, r)
+        h5.setNodeAttr(metadata_group, 'probe', json.dumps(probe.probes))
+        h5.createArray(metadata_group, 'datfiles_offsets_samples',
+                       np.hstack((0, np.cumsum(n_samples)))[:-1])
+    
+    ########## MAIN TIME CONSUMING LOOP OF PROGRAM ########################
     for (USpk, Spk, PeakSample,
-         ChannelMask, FloatChannelMask) in extract_spikes(basename,
+         ChannelMask, FloatChannelMask) in extract_spikes(h5s, basename,
                                                           DatFileNames,
                                                           n_ch_dat,
                                                           Channels_dat,
                                                           ChannelGraph,
-                                                          max_spikes):
+                                                          max_spikes,
+                                                          ):
         spike_table.row["unfiltered_wave"] = USpk
         spike_table.row["wave"] = Spk
         spike_table.row["time"] = PeakSample
         spike_table.row["channel_mask"] = ChannelMask
         spike_table.row["float_channel_mask"] = FloatChannelMask
         spike_table.row.append()
+        # what shank are we in?
+        nzc, = ChannelMask.nonzero()
+        shank = probe.channel_to_shank[nzc[0]]
+        # write only the channels of this shank
+        channel_list = np.array(sorted(list(probe.channel_set[shank])))
+        t = shank_table['spikedetekt', shank]
+        t.row['time'] = PeakSample
+        t.row['mask_binary'] = ChannelMask[channel_list]
+        t.row['mask_float'] = FloatChannelMask[channel_list]
+        t.row.append()
+        # and the waveforms
+        t = shank_table['waveforms', shank]
+        t.row['wave'] = Spk[:, channel_list]
+        t.row['unfiltered_wave'] = USpk[:, channel_list]
+        t.row.append()
         
-    spike_table.flush()    
+    spike_table.flush()
+    for h5 in h5s.values():
+        h5.flush()
 
     ### Feature extraction on spikes    
     PC_3s = reget_features(spike_table.cols.wave[:10000])
@@ -133,6 +197,8 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
                                      Parameters['SORT_CLUS_BY_CHANNEL'])
 
     hdf5file.close()
+    for h5 in h5s.values():
+        h5.close()
                 
 ###########################################################
 ############# Spike extraction helper functions ###########    
@@ -144,7 +210,8 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
 #m PeakSample is the position of the peak (e.g. 435688)
 #m ST (to the best of my understanding) is a bool array (no. of channels long) which shows on which 
 #m                                      channels the threshold was crossed (?)
-def extract_spikes(basename, DatFileNames, n_ch_dat, ChannelsToUse, ChannelGraph,
+def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
+                   ChannelsToUse, ChannelGraph,
                    max_spikes=None):
     # some global variables we use
     CHUNK_SIZE = Parameters['CHUNK_SIZE']

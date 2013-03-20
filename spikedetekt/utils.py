@@ -49,10 +49,11 @@ class indir(object):
         self.orig_dir = os.getcwd()
         self.new_dir = new_dir
     def __enter__(self):
-        print("entering %s"%self.new_dir)
-        mkdir_and_enter(self.new_dir)
+        #print("entering %s"%self.new_dir)
+        self.actualname = mkdir_and_enter(self.new_dir)
+        print("Working in directory %s"%self.actualname)
     def __exit__(self,*exc_info):
-        print("exiting %s"%self.new_dir)        
+        print("Exiting directory %s"%self.actualname)
         os.chdir(self.orig_dir)
 
 def mkdir_and_enter(DirName):

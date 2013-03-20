@@ -110,7 +110,25 @@ def spike_dtype():
         clu = Int32Col()
         fet_mask = Int8Col(shape=(1+FPC*N_CH,))
         float_fet_mask = Float32Col(shape=(1+FPC*N_CH,))
+    return description
+
+def shank_description(shanksize):
+    s_total = Parameters['S_TOTAL']
+    fpc = Parameters['FPC']
+    class description(IsDescription):
+        time = Int32Col()
+        mask_binary = Int8Col(shape=(shanksize,))
+        mask_float = Float32Col(shape=(shanksize,))
+        features = Float32Col(shape=(shanksize, fpc))
+    return description
+
+def waveform_description(shanksize):
+    s_total = Parameters['S_TOTAL']
+    class description(IsDescription):
+        wave = Float32Col(shape=(s_total, shanksize))
+        unfiltered_wave = Float32Col(shape=(s_total, shanksize))
     return description    
+
 
 def klusters_files(table, basename, probe):
     N_CH,  FPC = eval('(N_CH, FPC)', Parameters)

@@ -23,6 +23,11 @@ CHUNKS_FOR_THRESH = 5 # number of chunks used to determine threshold for detecti
 THRESH_SD = 4.5 # threshold for detection. standard deviations of signal
 DETECT_POSITIVE = False # detect spikes with positive threshold crossing
 
+# Recording data in HDF5 file
+RECORD_RAW = True      # raw data
+RECORD_HIGH = True     # high pass filtered data
+RECORD_LOW = True      # low pass filtered data
+
 # Options for filtering
 F_LOW = 500. # low pass frequency (Hz)
 BUTTER_ORDER = 3 # Order of butterworth filter
