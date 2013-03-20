@@ -78,14 +78,8 @@ I have included some examples of probe files:
 
 2) Parameters to adjust
 ----------------------------
+Create a file called filename.params where filename is the name of your desired output folder. It should contain
 
-Please alter the following two lines in your parameters.py file (I have included the file example_parameters.py)
-
-    # Options for computing in chunks
-    CHUNK_SIZE = 20000   # number of time samples used in chunk for filtering and detection
-    CHUNK_OVERLAP = 200 # number of samples that chunks overlap in time
-
-The higher your sampling rate, the higher you should set these two (maintain the ratio of 10:1, it seems good). Set CHUNK_SIZE =  sampling rate.
 
 The default parameters are as follows (see /spikedetekt/defaultparameters.py and change as desired):
 
