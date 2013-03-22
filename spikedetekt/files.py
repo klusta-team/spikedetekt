@@ -136,6 +136,7 @@ def klusters_files(h5s, shank_table, basename, probe):
         T = shank_table['spikedetekt', shank]
         write_fet(T.cols.features[:], basename+'.fet.'+str(shank))
         time = T.cols.time[:]
+        write_trivial_clu(time, basename+'.clu.'+str(shank))
         write_res(time, basename+'.res.'+str(shank))
         write_spk_buffered(shank_table['waveforms', shank],
                            'wave', basename+'.spk.'+str(shank),
@@ -186,6 +187,21 @@ def write_clu(clus, filepath):
     #one cluster per line
     np.savetxt(clu_file,np.int16(clus),fmt="%i")
     clu_file.close()
+
+def write_trivial_clu(restimes,filepath):
+    """writes cluster cluster assignments to text file readable by klusters and neuroscope.
+    input: clus is a 1D or 2D numpy array of integers
+    output:
+        top line: number of clusters (max cluster)
+        next lines: one integer per line"""
+    clus = np.zeros_like(restimes) 
+    clu_file = open( filepath,'w')
+    #header line: number of clusters
+    n_clu = clus.max()+1
+    clu_file.write( '%i\n'%n_clu)
+    #one cluster per line
+    np.savetxt(clu_file,np.int16(clus),fmt="%i")
+    clu_file.close() 
     
     
 def read_clu(filepath):
