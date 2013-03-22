@@ -197,8 +197,9 @@ SpiKeDeteKt will output the following files, where n is your shank number:
 + .fil (highpass filtered data)
 
 + .h5 files (an [.h5](http://en.wikipedia.org/wiki/Hierarchical_Data_Format) file duplicating a lot of the above data, which will later replace the above).
-  .high.h5
-  .low.h5
-  .waves.h5
-  .main.h5
-  .raw.h5
+  .high.h5,
+  .low.h5,
+  .waves.h5,
+  .main.h5,
+  .raw.h5. (See .md for more details).
+
