@@ -96,7 +96,25 @@ set of channels for that shank</p></li>
 <li>multishankslinear32.probe (an 8 shank example)</li>
 </ul><h2>2) Parameters to adjust</h2>
 
-<p>Create a file called filename.params where filename is the name of your desired output folder. It should contain</p>
+<p>Create a file called filename.params where filename is the name of your desired output folder. It should 
+have the same form as the defaultparameters.py file in /spikedetekt/spikedetket/. It should contain the 
+following minimal information:</p>
+
+<pre><code>DTYPE = "i2" # "&gt;i2" (&gt; means big-endian), "i4", "f2"
+# see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
+
+# Probe file (no default value provided)
+PROBE_FILE = 'probe_filename.probe'
+
+# Raw data files (no default values provided)
+RAW_DATA_FILES = ['file1.dat', 'file2.dat','file3.dat']
+NCHANNELS = 32
+SAMPLERATE = 20000 # in Hertz
+</code></pre>
+
+<p>You can specify an ordered list of .dat files to be concatenated, in the above example file1.dat, file2.dat and file3.dat are three
+recordings to be concatenated. The output files will be written to a folder
+called `filename', where filename.params is the name of your parameters file. </p>
 
 <p>The default parameters are as follows (see /spikedetekt/defaultparameters.py and change as desired):</p>
 
@@ -165,6 +183,8 @@ DO_GLOBAL_CLUSTERING = False
 SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
 </code></pre>
 
+<p>If you need parameters which differ from the default, include these in your filename.params files. </p>
+
 <h2>3) Running</h2>
 
 <p>Finally to run the program type:</p>
@@ -180,23 +200,18 @@ SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occur
 <li>.fet.n (feature file - required for all versions of KlustaKwik)</li>
 </ol><ul>
 <li><p>.mask.n (needed for using the new (masked) KlustaKwik)</p></li>
-<li><p>.clu.n (a trivial clue file where everything is put into a single cluster, enabling the user to peruse the data using Klusters if desired)</p></li>
 <li><p>.fmask.n (trial - float masks instead of binary, we are using this for testing masked KlustaKwik)</p></li>
 <li><p>.spk.n (spike file)</p></li>
 <li><p>.upsk.n (unfiltered spike waveform)</p></li>
 <li><p>.res.n (list of spike times)</p></li>
-<li><p>.xml (an xml file with all the parameters that can subsequently be used by neuroscope or klusters)</p></li>
+<li><p>.xml (an xml file with all the parameters that can subsequently be used by Neuroscope or Klusters)</p></li>
 <li><p>.fil (highpass filtered data)</p></li>
-<li>
-<p>.h5 (an <a href="http://en.wikipedia.org/wiki/Hierarchical_Data_Format">.h5</a> file duplicating a lot of the above data, which may later be eliminated). It contains:</p>
-
-<ul>
-<li> raw, unfiltered, unaligned wave</li>
-<li>filtered, aligned wave</li>
-<li>channel mask</li>
-<li>float channel mask</li>
-</ul>
-</li>
+<li><p>.h5 files (an <a href="http://en.wikipedia.org/wiki/Hierarchical_Data_Format">.h5</a> file duplicating a lot of the above data, which will later replace the above).
+.high.h5,
+.low.h5,
+.waves.h5,
+.main.h5,
+.raw.h5. (See spikdetekt/docs/fileformat.md for more details).</p></li>
 </ul>
       </section>
       <footer>
