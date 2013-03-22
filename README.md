@@ -192,12 +192,13 @@ SpiKeDeteKt will output the following files, where n is your shank number:
 
 + .res.n (list of spike times)
 
-+ .xml (an xml file with all the parameters that can subsequently be used by neuroscope or klusters)
++ .xml (an xml file with all the parameters that can subsequently be used by Neuroscope or Klusters)
 
 + .fil (highpass filtered data)
 
-+ .h5 (an [.h5](http://en.wikipedia.org/wiki/Hierarchical_Data_Format) file duplicating a lot of the above data, which may later be eliminated). It contains:
-    *  raw, unfiltered, unaligned wave
-    * filtered, aligned wave
-    * channel mask
-    * float channel mask
++ .h5 files (an [.h5](http://en.wikipedia.org/wiki/Hierarchical_Data_Format) file duplicating a lot of the above data, which will later replace the above).
+  .high.h5
+  .low.h5
+  .waves.h5
+  .main.h5
+  .raw.h5
