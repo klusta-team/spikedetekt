@@ -78,8 +78,23 @@ I have included some examples of probe files:
 
 2) Parameters to adjust
 ----------------------------
-Create a file called filename.params where filename is the name of your desired output folder. It should contain
+Create a file called filename.params where filename is the name of your desired output folder. It should 
+have the same form as the defaultparameters.py file in /spikedetekt/spikedetket/. It should contain the 
+following minimal information:
 
+    DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
+    # see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
+
+    # Probe file (no default value provided)
+    PROBE_FILE = 'probe_filename.probe'
+
+    # Raw data files (no default values provided)
+    RAW_DATA_FILES = ['file1.dat', 'file2.dat']
+    NCHANNELS = 32
+    SAMPLERATE = 20000 # in Hertz
+
+Under `RAW_DATA_FILES', specify your list of .dat files to be concatenated. The output files will be written to a folder
+called `filename', where filename.params is the name of your parameters file. 
 
 The default parameters are as follows (see /spikedetekt/defaultparameters.py and change as desired):
 
@@ -148,7 +163,7 @@ The default parameters are as follows (see /spikedetekt/defaultparameters.py and
     SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
     
     
-
+If you need parameters which differ from the default, include these in your filename.params files. 
 
 
 3) Running
@@ -168,8 +183,6 @@ SpiKeDeteKt will output the following files, where n is your shank number:
 1. .fet.n (feature file - required for all versions of KlustaKwik)
 
 + .mask.n (needed for using the new (masked) KlustaKwik)
-
-+ .clu.n (a trivial clue file where everything is put into a single cluster, enabling the user to peruse the data using Klusters if desired)
 
 + .fmask.n (trial - float masks instead of binary, we are using this for testing masked KlustaKwik)
 
