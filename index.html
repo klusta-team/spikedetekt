@@ -199,11 +199,12 @@ SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occur
 <ol>
 <li>.fet.n (feature file - required for all versions of KlustaKwik)</li>
 </ol><ul>
-<li><p>.mask.n (needed for using the new (masked) KlustaKwik)</p></li>
+<li><p>.mask.n (binary masks for using with the new (masked) KlustaKwik)</p></li>
 <li><p>.fmask.n (trial - float masks instead of binary, we are using this for testing masked KlustaKwik)</p></li>
 <li><p>.spk.n (spike file)</p></li>
 <li><p>.upsk.n (unfiltered spike waveform)</p></li>
 <li><p>.res.n (list of spike times)</p></li>
+<li><p>.clu.n (a trivial clu file for use with Neuroscope, for observing spikes after detection, before clustering. Will be made redundant later)</p></li>
 <li><p>.xml (an xml file with all the parameters that can subsequently be used by Neuroscope or Klusters)</p></li>
 <li><p>.fil (highpass filtered data)</p></li>
 <li><p>.h5 files (an <a href="http://en.wikipedia.org/wiki/Hierarchical_Data_Format">.h5</a> file duplicating a lot of the above data, which will later replace the above).
