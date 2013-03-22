@@ -201,5 +201,5 @@ SpiKeDeteKt will output the following files, where n is your shank number:
   .low.h5,
   .waves.h5,
   .main.h5,
-  .raw.h5. (See .md for more details).
+  .raw.h5. (See spikdetekt/docs/fileformat.md for more details).
 
