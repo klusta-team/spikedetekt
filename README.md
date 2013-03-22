@@ -89,11 +89,12 @@ following minimal information:
     PROBE_FILE = 'probe_filename.probe'
 
     # Raw data files (no default values provided)
-    RAW_DATA_FILES = ['file1.dat', 'file2.dat']
+    RAW_DATA_FILES = ['file1.dat', 'file2.dat','file3.dat']
     NCHANNELS = 32
     SAMPLERATE = 20000 # in Hertz
 
-Under `RAW_DATA_FILES', specify your list of .dat files to be concatenated. The output files will be written to a folder
+You can specify an ordered list of .dat files to be concatenated, in the above example file1.dat, file2.dat and file3.dat are three
+recordings to be concatenated. The output files will be written to a folder
 called `filename', where filename.params is the name of your parameters file. 
 
 The default parameters are as follows (see /spikedetekt/defaultparameters.py and change as desired):
