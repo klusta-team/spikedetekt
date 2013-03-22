@@ -183,7 +183,7 @@ SpiKeDeteKt will output the following files, where n is your shank number:
 
 1. .fet.n (feature file - required for all versions of KlustaKwik)
 
-+ .mask.n (needed for using the new (masked) KlustaKwik)
++ .mask.n (binary masks for using with the new (masked) KlustaKwik)
 
 + .fmask.n (trial - float masks instead of binary, we are using this for testing masked KlustaKwik)
 
@@ -192,6 +192,8 @@ SpiKeDeteKt will output the following files, where n is your shank number:
 + .upsk.n (unfiltered spike waveform)
 
 + .res.n (list of spike times)
+
++ .clu.n (a trivial clu file for use with Neuroscope, for observing spikes after detection, before clustering. Will be made redundant later)
 
 + .xml (an xml file with all the parameters that can subsequently be used by Neuroscope or Klusters)
 
