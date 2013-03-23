@@ -54,6 +54,7 @@ def chunks(DatFileNames, n_ch_dat, ChannelsToUse):
     offsets = np.hstack((0, np.cumsum(n_samples)))
     total_n_samples = np.sum(n_samples)
     fileobjs = [open(DatFileName, 'rb') for DatFileName in DatFileNames]
+    objs_and_offsets = zip(fileobjs, offsets[:-1], offsets[1:])
     for s_start, s_end, keep_start, keep_end in chunk_bounds(total_n_samples,
                                                              CHUNK_SIZE,
                                                              CHUNK_OVERLAP):
@@ -61,7 +62,7 @@ def chunks(DatFileNames, n_ch_dat, ChannelsToUse):
         # s_start*n_ch_dat*sizeof(DTYPE) to s_end*n_ch_dat*sizeof(DTYPE)
         # but we are reading from a virtual concatenated file
         pieces = []
-        for fd, f_start, f_end in zip(fileobjs, offsets[:-1], offsets[1:]):
+        for fd, f_start, f_end in objs_and_offsets:
             # find the intersection of [f_start, f_end] and [s_start, s_end]
             i_start = max(f_start, s_start)
             i_end = min(f_end, s_end)
@@ -79,7 +80,10 @@ def chunks(DatFileNames, n_ch_dat, ChannelsToUse):
                 DatChunk = DatChunk[:, ChannelsToUse]
                 DatChunk = DatChunk.astype(np.float32)
                 pieces.append(DatChunk)
-        DatChunk = np.vstack(pieces)
+        if len(pieces)==1:
+            DatChunk = pieces[0]
+        else:
+            DatChunk = np.vstack(pieces)
         yield DatChunk, s_start, s_end, keep_start, keep_end
 
 
