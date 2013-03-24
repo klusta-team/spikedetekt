@@ -39,6 +39,17 @@ def chunk_bounds(n_samples, chunk_size, overlap):
     yield s_start,s_end,keep_start,keep_end   
 
 
+def datfile_sizes(DatFileNames, n_ch_dat):
+    DTYPE = Parameters['DTYPE']
+    dtype_size = np.nbytes[DTYPE]
+    n_samples = [num_samples(DatFileName,
+                             n_ch_dat,
+                             n_bytes=dtype_size) for DatFileName in DatFileNames]
+    n_samples = np.array(n_samples, dtype=int)
+    offsets = np.hstack((0, np.cumsum(n_samples)))
+    return n_samples, offsets
+
+
 def chunks(DatFileNames, n_ch_dat, ChannelsToUse):
     '''
     Yields the chunks from the data file
@@ -47,11 +58,7 @@ def chunks(DatFileNames, n_ch_dat, ChannelsToUse):
     CHUNK_OVERLAP = Parameters['CHUNK_OVERLAP']
     DTYPE = Parameters['DTYPE']
     dtype_size = np.nbytes[DTYPE]
-    n_samples = [num_samples(DatFileName,
-                             n_ch_dat,
-                             n_bytes=dtype_size) for DatFileName in DatFileNames]
-    n_samples = np.array(n_samples, dtype=int)
-    offsets = np.hstack((0, np.cumsum(n_samples)))
+    n_samples, offsets = datfile_sizes(DatFileNames, n_ch_dat)
     total_n_samples = np.sum(n_samples)
     fileobjs = [open(DatFileName, 'rb') for DatFileName in DatFileNames]
     objs_and_offsets = zip(fileobjs, offsets[:-1], offsets[1:])
@@ -85,6 +92,42 @@ def chunks(DatFileNames, n_ch_dat, ChannelsToUse):
         else:
             DatChunk = np.vstack(pieces)
         yield DatChunk, s_start, s_end, keep_start, keep_end
+        
+        
+class FilWriter(object):
+    def __init__(self, DatFileNames, n_ch_dat):
+        if not Parameters['WRITE_FIL_FILE']:
+            return
+        # create .fil files, one for each .dat file, with matching names
+        self.filenames = [basename_noext(n)+'.fil' for n in DatFileNames]
+        if len(self.filenames)>len(set(self.filenames)):
+            # in case the base filename is used multiple times, we write out
+            # the number of the datfile as well 
+            self.filenames = [basename_noext(n)+'_'+str(i)+'.fil' for i, n in enumerate(DatFileNames)]
+        self.fileobjs = [open(n, 'wb') for n in self.filenames]
+        self.n_samples, self.offsets = datfile_sizes(DatFileNames, n_ch_dat)
+        self.objs_and_offsets = zip(self.fileobjs,
+                                    self.offsets[:-1], self.offsets[1:])
+                
+    def write(self, FilteredChunk, s_start, s_end, keep_start, keep_end):
+        if not Parameters['WRITE_FIL_FILE']:
+            return
+        if s_end>keep_end: #m writing out the high-pass filtered data
+            FilteredChunkInt = FilteredChunk[keep_start-s_start:keep_end-s_end]
+            FilteredChunkInt = np.int16(FilteredChunkInt)
+        else: #m we're in the end
+            FilteredChunkInt = np.int16(FilteredChunk[keep_start-s_start:])
+        for fd, f_start, f_end in self.objs_and_offsets:
+            # find the intersection of [f_start, f_end] and [s_start, s_end]
+            i_start = max(f_start, keep_start)
+            i_end = min(f_end, keep_end)
+            # intersection is nonzero if i_end>i_start only
+            if i_end>i_start:
+                # start and end of intersection as an offset into the file in
+                # samples
+                a_start = i_start-keep_start
+                a_end = i_end-keep_start
+                fd.write(FilteredChunkInt[a_start:a_end])
 
 
 def get_chunk_for_thresholding(fd, n_ch_dat, ChannelsToUse, n_samples):

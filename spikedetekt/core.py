@@ -14,7 +14,7 @@ from floodfill import connected_components
 from features import compute_pcs, reget_features, project_features
 from files import (num_samples, klusters_files,
                    get_chunk_for_thresholding, chunks, shank_description,
-                   waveform_description)
+                   waveform_description, FilWriter)
 from filtering import apply_filtering, get_filter_params
 from progressbar import ProgressReporter
 from alignment import extract_wave
@@ -211,8 +211,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
     progress_bar = ProgressReporter()
     
     #m A code that writes out a high-pass filtered version of the raw data (.fil file)
-    if Parameters['WRITE_FIL_FILE']:
-        fil_fd = open(basename+'.fil', 'wb')
+    fil_writer = FilWriter(DatFileNames, n_ch_dat)
 
     # Just use first dat file for getting the thresholding data
     with open(DatFileNames[0], 'rb') as fd:
@@ -237,13 +236,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         FilteredChunk = apply_filtering(filter_params, DatChunk)
         
         # write filtered output to file
-        if Parameters['WRITE_FIL_FILE']:
-            if s_end>keep_end: #m writing out the high-pass filtered data
-                FilteredChunkInt = FilteredChunk[keep_start-s_start:keep_end-s_end]
-                FilteredChunkInt = np.int16(FilteredChunkInt)
-            else: #m we're in the end
-                FilteredChunkInt = np.int16(FilteredChunk[keep_start-s_start:])
-            fil_fd.write(FilteredChunkInt) #m
+        fil_writer.write(FilteredChunk, s_start, s_end, keep_start, keep_end)
 
         ############## THRESHOLDING #####################################
         if Parameters['DETECT_POSITIVE']:
@@ -281,6 +274,3 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             break
     
     progress_bar.finish()
-    
-    if Parameters['WRITE_FIL_FILE']:
-        fil_fd.close()  
