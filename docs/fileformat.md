@@ -254,7 +254,8 @@ shank 0.
       * /metadata:
           * /metadata/parameters (all information in parameters.py)
               * sampling rate
-              * voltage gain
+              * voltage gain (vector with one value per channel, possibly a 
+                single value in the paramters file, then converted into a vector)
           * /metadata/probe (probe structure as a JSON string)
           * /metadata/datfiles_start_points (the length of each session subfile)
       * external links (options in parameters.py, used by spikedetekt, to save 
