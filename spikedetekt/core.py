@@ -25,7 +25,7 @@ from subsets import cluster_withsubsets
 from masking import get_float_mask
 from log import log_message
 
-def set_globals_samples(sample_rate):
+def set_globals_samples(sample_rate,high_frequency_factor):
     """
     parameters are set in terms of time (seconds).
     this sets corresponding parameters in terms of sample rate. should be run
@@ -55,7 +55,8 @@ def spike_detection_job(DatFileNames, ProbeFileName, output_dir, output_name):
     
     n_ch_dat = Parameters['NCHANNELS']
     sample_rate = Parameters['SAMPLERATE']
-    set_globals_samples(sample_rate)
+    high_frequency_factor = Parameters['F_HIGH_FACTOR']
+    set_globals_samples(sample_rate,high_frequency_factor)
     Parameters['CHUNK_OVERLAP'] = int(sample_rate*Parameters['CHUNK_OVERLAP_SECONDS'])
     
     Parameters['N_CH'] = probe.num_channels
