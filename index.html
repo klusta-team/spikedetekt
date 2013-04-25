@@ -146,6 +146,7 @@ RECORD_LOW = True      # low pass filtered data
 
 # Options for filtering
 F_LOW = 500. # low pass frequency (Hz)
+F_HIGH_FACTOR = 0.95 # high pass frequency as a proportion of the Nyquist freq, used to derive F_HIGH, i.e. F_HIGH = 0.95*SAMPLERATE/2 here
 BUTTER_ORDER = 3 # Order of butterworth filter
 WRITE_FIL_FILE = True # write filtered output to .fil file
 
