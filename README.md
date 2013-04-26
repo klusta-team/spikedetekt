@@ -95,7 +95,7 @@ following minimal information:
 
 You can specify an ordered list of .dat files to be concatenated, in the above example file1.dat, file2.dat and file3.dat are three
 recordings to be concatenated. The output files will be written to a folder
-called `filename', where filename.params is the name of your parameters file. 
+called `filename', where outputfoldernameparams.py is the name of your parameters file. 
 
 The default parameters are as follows (see /spikedetekt/defaultparameters.py and change as desired):
 
@@ -165,7 +165,7 @@ The default parameters are as follows (see /spikedetekt/defaultparameters.py and
     SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
     
     
-If you need parameters which differ from the default, include these in your filename.params files. 
+If you need parameters which differ from the default, include these in your outputfoldernameparams.py files. 
 
 
 3) Running
@@ -173,7 +173,7 @@ If you need parameters which differ from the default, include these in your file
 
 Finally to run the program type:
 
-    python SpiKeDeteKt/scripts/detektspikes.py filename.params
+    python SpiKeDeteKt/scripts/detektspikes.py outputfoldernameparams.py
 
 
 
