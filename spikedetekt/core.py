@@ -32,7 +32,8 @@ def set_globals_samples(sample_rate,high_frequency_factor):
     before any processing
     """
     Parameters['SAMPLE_RATE'] = sample_rate
-    exec 'F_HIGH = high_frequency_factor*SAMPLE_RATE/2' in Parameters
+    Parameters['HFF']=high_frequency_factor
+    exec 'F_HIGH = HFF*SAMPLE_RATE/2' in Parameters
     exec 'S_BEFORE = int(T_BEFORE*SAMPLE_RATE)' in Parameters
     exec 'S_AFTER = int(T_AFTER*SAMPLE_RATE)' in Parameters
     exec 'S_TOTAL = S_BEFORE + S_AFTER' in Parameters
