@@ -182,11 +182,11 @@ Finally to run the program type:
 
 SpiKeDeteKt will output the following files, where n is your shank number:
 
-1. .fet.n (feature file - required for all versions of KlustaKwik)
++ .fet.n (feature file - required for all versions of KlustaKwik)
 
-+ .mask.n (binary masks for using with the new (masked) KlustaKwik)
++ .fmask.n (float masks for using with the new masked KlustaKwik)
 
-+ .fmask.n (trial - float masks instead of binary, we are using this for testing masked KlustaKwik)
++ .mask.n (soon to be obsolete: binary masks for using with the new (masked) KlustaKwik)
 
 + .spk.n (spike file)
 
