@@ -42,6 +42,10 @@ def connected_components(st_arr, ch_graph, s_back):
         # in the graph defined by ch_graph in the case of edges, and
         # j_s from i_s-s_back to i_s.
         for j_s in xrange(i_s-s_back, i_s+1):
+            # allow us to leave out a channel from the graph to exclude bad
+            # channels
+            if i_ch not in mch_graph:
+                continue
             for j_ch in mch_graph[i_ch]:
                 # label of the adjacent element
                 adjlabel = label_buffer[j_s, j_ch]
