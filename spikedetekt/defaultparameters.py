@@ -64,5 +64,6 @@ CHUNK_OVERLAP_SECONDS = 0.01 # overlap time (in seconds) of chunks, should be wi
 MAX_SPIKES = None # None for all spikes, or an int
 
 # Experimental options
+DEBUG = False # For debugging
 DO_GLOBAL_CLUSTERING = False
 SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
