@@ -1,4 +1,5 @@
 from __future__ import with_statement, division
+# from IPython import embed # For manual debugging
 import itertools as it, numpy as np, scipy.signal as signal
 from scipy.stats import rv_discrete
 from scipy.stats.mstats import mquantiles
@@ -24,6 +25,8 @@ from time import sleep
 from subsets import cluster_withsubsets
 from masking import get_float_mask
 from log import log_message
+import debug
+from debug import plot_diagnostics # for debugging with Parameters['DEBUG'] 
 
 def set_globals_samples(sample_rate,high_frequency_factor):
     """
@@ -246,6 +249,13 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         else:
             BinaryChunk = (FilteredChunk<-Threshold)
         BinaryChunk = BinaryChunk.astype(np.int8)
+        if Parameters['DEBUG']:
+            plot_diagnostics(s_start,BinaryChunk,DatChunk,FilteredChunk,Threshold)
+
+        #interestpoint = 8050118 #Interested in a spike here
+        #if (interestpoint-19800)<=s_start<(interestpoint):
+        #    embed() # Start IPython
+        #print 'BinaryChunk.shape = ', BinaryChunk.shape
         ############### FLOOD FILL  ######################################
         ChannelGraphToUse = complete_if_none(ChannelGraph, N_CH)
         IndListsChunk = connected_components(BinaryChunk,
