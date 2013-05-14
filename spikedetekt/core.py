@@ -23,7 +23,7 @@ from parameters import Parameters, GlobalVariables
 from time import sleep
 from subsets import cluster_withsubsets
 from masking import get_float_mask
-from log import log_message
+from log import log_message, log_warning
 
 def set_globals_samples(sample_rate,high_frequency_factor):
     """
@@ -253,13 +253,18 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         ############## ALIGN AND INTERPOLATE WAVES #######################
         nextbits = []
         for IndList in IndListsChunk:
-            wave, s_peak, cm = extract_wave(IndList, FilteredChunk,
-                                            S_BEFORE, S_AFTER, N_CH,
-                                            s_start)
-            s_offset = s_start+s_peak
-            if keep_start<=s_offset<keep_end:
-                spike_count += 1
-                nextbits.append((wave, s_offset, cm))
+            try:
+                wave, s_peak, cm = extract_wave(IndList, FilteredChunk,
+                                                S_BEFORE, S_AFTER, N_CH,
+                                                s_start)
+                s_offset = s_start+s_peak
+                if keep_start<=s_offset<keep_end:
+                    spike_count += 1
+                    nextbits.append((wave, s_offset, cm))
+            except np.linalg.LinAlgError:
+                s = '*** WARNING *** Unalignable spike discarded in chunk {chunk}.'.format(
+                        chunk=(s_start, s_end))
+                log_warning(s)
         # and return them in time sorted order
         nextbits.sort(key=lambda (wave, s, cm): s)
         for wave, s, cm in nextbits:
