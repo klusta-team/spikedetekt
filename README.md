@@ -3,6 +3,8 @@ SpikeDetekt
 
 This is a program for spike detection, that is optimized for high-channel count silicon probes.
 
+This software was developed at the [Cortical Processing Laboratory](http://www.ucl.ac.uk/cortexlab) at UCL.
+
 Please send feedback to Kenneth Harris (firstname at cortexlab.net), Shabnam Kadir (firstname at cortexlab.net)
 
 Here is a quick Start Guide (will become more comprehensive with time):
@@ -33,7 +35,24 @@ To perform spike detection, you need:
 
 2) Probefiles:
 ---------------
+A probe file is a text file containing the information pertaining to the spatial arrangement of electrodes on the probe. This information is presented in the following form: 
 
+The general form of a .probe file should take the following form:
+
+    probes = {
+        1: [
+            (0, 1), (0, 2),
+            (1, 2), (1, 3),
+            ...
+            ],
+        2: [
+           (13,15),(13,14),...
+            ],
+            
+        shank number: [neighbouring channel pairs
+            ],
+        ...
+        }
 
 I have included some examples of probe files:
 
@@ -45,21 +64,7 @@ I have included some examples of probe files:
 
 Below are the instructions for a multi-shank probe (I hope this is clear from my example probe - otherwise do ask):
 
-Construct a probe object from a .probe file with:
 
-   probe = Probe(filename)
-
-The file should have a form something like:
-
-    probes = {
-        1: [
-            (0, 1), (0, 2),
-            (1, 2), (1, 3),
-            ...
-            ],
-        2: [...],
-        ...
-        }
 
 The file is a Python file which should define a dictionary variable probes,
 with keys the shank number, and values a list of channel pairs defining the
@@ -182,6 +187,7 @@ The default parameters are as follows (see /spikedetekt/defaultparameters.py):
 If you need parameters which differ from the default, include these in your outputfoldername.params files. 
 
 
+
 4) Running
 ----------------------------
 
@@ -191,7 +197,7 @@ Finally to run the program type the following into the command line:
 
 
 
-4) Output
+5) Output
 ---------------
 
 SpiKeDeteKt will output the following files, where n is your shank number:
