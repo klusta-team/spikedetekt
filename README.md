@@ -35,7 +35,13 @@ To perform spike detection, you need:
 * a .probe file, which contains information about the electrode,
 * a .params file, which contains all other parameters.
 
-The above may have any combination of names. The name of your .params file will be the name of the folder where all the output will be stored.
+The above may have any combination of names. The name of your .params file will be the name of the folder where all the output will be stored. The simplest case is when you have the same name for all three files:
+
+    myexperiment.dat
+    myexperiment.probe
+    myexperiment.params
+    
+This will result in output files contained in a folder with the local name: myexperiment.     
 
 2) Probefiles:
 ---------------
@@ -69,15 +75,18 @@ I have included some examples of probe files:
 * multishankslinear32.probe (an 8 shank example)
 
 
+3) Running
+----------------------------
+
+To run the program type the following into the command line:
+
+    python spikedetekt/scripts/detektspikes.py myexperiment.params
+ 
+See below how to configure your parameter file, myexperiment.params.
 
 
 
-
-
-
-
-
-3) Parameters to adjust
+4) Parameters to adjust
 ----------------------------
 Create a file called outputfoldernameparams.params where outputfoldernameparams is the name of your desired output folder in your local directory. It should 
 have the same form as the defaultparameters.py file in /spikedetekt/spikedetekt/. It should contain the 
@@ -170,12 +179,7 @@ If you need parameters which differ from the default, include these in your outp
 
 
 
-4) Running
-----------------------------
 
-Finally to run the program type the following into the command line:
-
-    python SpiKeDeteKt/scripts/detektspikes.py outputfoldername.params
 
 
 
