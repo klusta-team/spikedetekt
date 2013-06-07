@@ -17,11 +17,14 @@ SpikeDetekt is written in Python and should work on any OS. To install it, make 
 
 We recommend you use Python 2.6 or 2.7 (don't use python 3.X!). A free academic distribution can be obtained from [Enthought Python](http://enthought.com/products/epd.php).
 
-Once you have set up Python on your system, go to the SpikeDetekt folder and type (on the command line):
+Once you have set up Python on your system, download and unzip/tar either the .zip file or the tarball,
+go to the `spikedetekt' folder and type (on the command line):
 
     python setup.py install
 
-This will install SpikeDetekt.
+In the above,  'python' is the necessary command on your system for calling python. The file 'setup.py' is to be found in the unzipped folder spikedetekt. 
+
+This will install SpikeDetekt. 
 
 1) Usage:
 ----------
@@ -29,15 +32,16 @@ This will install SpikeDetekt.
 To perform spike detection, you need:
 
 * a .dat file (which contains your raw unfiltered electrode data), 
-* a .probe file, which contains information about the electrode.
-* a .params file, which contains all other parameters
+* a .probe file, which contains information about the electrode,
+* a .params file, which contains all other parameters.
 
+The above may have any combination of names. The name of your .params file will be the name of the folder where all the output will be stored.
 
 2) Probefiles:
 ---------------
 A probe file is a text file containing the information pertaining to the spatial arrangement of electrodes on the probe. This information is presented in the following form: 
 
-The general form of a .probe file should take the following form:
+The general form of a .probe file for a multi-shank probe should take the following form:
 
     probes = {
         1: [
@@ -54,6 +58,10 @@ The general form of a .probe file should take the following form:
         ...
         }
 
+The file is a Python file which should define a dictionary variable probes,
+with keys the shank number, and values a list of channel pairs defining the
+edges of the graph.
+
 I have included some examples of probe files:
 
 * buzsaki32.probe
@@ -62,34 +70,8 @@ I have included some examples of probe files:
 
 
 
-Below are the instructions for a multi-shank probe (I hope this is clear from my example probe - otherwise do ask):
 
 
-
-The file is a Python file which should define a dictionary variable probes,
-with keys the shank number, and values a list of channel pairs defining the
-edges of the graph.
-
-The Probe object has the following attributes:
-
-* num_channels  
-The number of channels used (1+the maximum channel number referred to)
-
-* channel_graph 
- A dictionary with keys the shank number, and values being graphs. A graph being a dictionary with keys the nodes (channel number) and values the set of all connected nodes. (So each channel in an edge is referred to twice in this data structure.)
-
-* shanks_set
-       The set of shank numbers
-   
-* channel_set
-       A dictionary with keys the shank numbers, and values the 
-set of channels for that shank
-
-* channel_to_shank
-       A dictionary with keys the channel numbers and values the corresponding shank number.
-
-* probes
-       The raw probes dictionary definition in the file.
 
 
 
