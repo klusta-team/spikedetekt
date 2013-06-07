@@ -8,7 +8,7 @@ Please send feedback to Kenneth Harris (firstname at cortexlab.net), Shabnam Kad
 Here is a quick Start Guide (will become more comprehensive with time):
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-0) Installation
+0) Installation:
 ----------------
 
 SpikeDetekt is written in Python and should work on any OS. To install it, make sure you first have Python on your computer.
@@ -21,9 +21,14 @@ Once you have set up Python on your system, go to the SpikeDetekt folder and typ
 
 This will install SpikeDetekt.
 
-1) Usage
+1) Usage:
+----------
 
-To perform spike detection, you need a .dat file (which contains your raw unfiltered electrode data), and a .probe file, which contains information about the electrode.
+To perform spike detection, you need:
+
+* a .dat file (which contains your raw unfiltered electrode data), 
+* a .probe file, which contains information about the electrode.
+* a .params file, which contains all other parameters
 
 
 2) Probefiles:
