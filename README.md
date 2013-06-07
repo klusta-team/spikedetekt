@@ -88,26 +88,18 @@ See below on how to configure your parameter file, myexperiment.params according
 
 4) Parameters to adjust
 ----------------------------
-Create a file called outputfoldernameparams.params where outputfoldernameparams is the name of your desired output folder in your local directory. It should 
-have the same form as the defaultparameters.py file in /spikedetekt/spikedetekt/. It should contain the 
-following minimal information:
+Your myexperiment.params file should contain the following minimal information pertaining to the location of your .probe and .dat files on your system and some very basic information, such as the total number of channels used:
 
-    DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
-    # see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
-
-    # Probe file (no default value provided)
+    
     PROBE_FILE = 'probe_filename.probe'
 
-    # Raw data files (no default values provided)
     RAW_DATA_FILES = ['file1.dat', 'file2.dat','file3.dat']
     NCHANNELS = 32
     SAMPLERATE = 20000 # in Hertz
 
-You can specify an ordered list of .dat files to be concatenated, in the above example file1.dat, file2.dat and file3.dat are three
-recordings to be concatenated. By default the output files will be written to a folder
-called `outputfoldername', where outputfoldername.params is the name of your parameters file. 
+You can specify an ordered list of .dat files to be concatenated, in the above example file1.dat, file2.dat and file3.dat are three recordings to be concatenated. 
 
-The default parameters are as follows (see /spikedetekt/defaultparameters.py):
+The default parameters are as follows (see spikedetekt/spikedetekt/defaultparameters.py):
 
     DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
     # see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
@@ -175,18 +167,13 @@ The default parameters are as follows (see /spikedetekt/defaultparameters.py):
     SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
     
     
-If you need parameters which differ from the default, include these in your outputfoldername.params files. 
-
-
-
-
-
+If you need parameters which differ from the default, include these in your myexperiment.params file. 
 
 
 5) Output
 ---------------
 
-SpiKeDeteKt will output the following files, where n is your shank number:
+SpikeDetekt will output the following files for each shank, where n is your shank number:
 
 + .fet.n (feature file - required for all versions of KlustaKwik)
 
@@ -201,6 +188,8 @@ SpiKeDeteKt will output the following files, where n is your shank number:
 + .res.n (list of spike times)
 
 + .clu.n (a trivial clu file for use with Neuroscope, for observing spikes after detection, before clustering. Will be made redundant later)
+
+In addition, the following file will also be output:
 
 + .xml (an xml file with the parameters that are needed by the data visualization programs: Neuroscope and Klusters). We now recommend using KlustaViewa for manual clustering.
 
