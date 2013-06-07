@@ -1,7 +1,7 @@
 SpikeDetekt
 -----------
 
-This is a program for spike detection. It is in development.
+This is a program for spike detection, that is optimized for high-channel count silicon probes.
 
 Contact: Kenneth Harris (firstname at cortexlab.net), Shabnam Kadir (firstname at cortexlab.net)
 
