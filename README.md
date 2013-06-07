@@ -90,7 +90,7 @@ set of channels for that shank
 
 
 
-2) Parameters to adjust
+3) Parameters to adjust
 ----------------------------
 Create a file called outputfoldernameparams.params where outputfoldernameparams is the name of your desired output folder in your local directory. It should 
 have the same form as the defaultparameters.py file in /spikedetekt/spikedetekt/. It should contain the 
@@ -182,10 +182,10 @@ The default parameters are as follows (see /spikedetekt/defaultparameters.py):
 If you need parameters which differ from the default, include these in your outputfoldername.params files. 
 
 
-3) Running
+4) Running
 ----------------------------
 
-Finally to run the program type:
+Finally to run the program type the following into the command line:
 
     python SpiKeDeteKt/scripts/detektspikes.py outputfoldername.params
 
@@ -200,7 +200,7 @@ SpiKeDeteKt will output the following files, where n is your shank number:
 
 + .fmask.n (float masks for using with the new masked KlustaKwik)
 
-+ .mask.n (soon to be obsolete: binary masks for using with the new (masked) KlustaKwik)
++ .mask.n (soon to be obsolete: binary masks for using with the new masked KlustaKwik)
 
 + .spk.n (spike file)
 
@@ -210,7 +210,7 @@ SpiKeDeteKt will output the following files, where n is your shank number:
 
 + .clu.n (a trivial clu file for use with Neuroscope, for observing spikes after detection, before clustering. Will be made redundant later)
 
-+ .xml (an xml file with all the parameters that can subsequently be used by Neuroscope or Klusters)
++ .xml (an xml file with the parameters that are needed by the data visualization programs: Neuroscope and Klusters). We now recommend using KlustaViewa for manual clustering.
 
 + .fil (highpass filtered data)
 
