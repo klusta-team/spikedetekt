@@ -92,7 +92,7 @@ set of channels for that shank
 
 2) Parameters to adjust
 ----------------------------
-Create a file called filename.params where filename is the name of your desired output folder. It should 
+Create a file called outputfoldernameparams.py where outputfoldernameparams is the name of your desired output folder. It should 
 have the same form as the defaultparameters.py file in /spikedetekt/spikedetket/. It should contain the 
 following minimal information:
 
@@ -108,10 +108,10 @@ following minimal information:
     SAMPLERATE = 20000 # in Hertz
 
 You can specify an ordered list of .dat files to be concatenated, in the above example file1.dat, file2.dat and file3.dat are three
-recordings to be concatenated. The output files will be written to a folder
-called `filename', where outputfoldernameparams.py is the name of your parameters file. 
+recordings to be concatenated. By default the output files will be written to a folder
+called `outputfoldernameparams', where outputfoldernameparams.py is the name of your parameters file. 
 
-The default parameters are as follows (see /spikedetekt/defaultparameters.py and change as desired):
+The default parameters are as follows (see /spikedetekt/defaultparameters.py):
 
     DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
     # see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
