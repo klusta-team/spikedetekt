@@ -82,7 +82,7 @@ To run the program type the following into the command line:
 
     python spikedetekt/scripts/detektspikes.py myexperiment.params
  
-See below how to configure your parameter file, myexperiment.params.
+See below on how to configure your parameter file, myexperiment.params according to the specifics of your experimental setup.
 
 
 
