@@ -28,7 +28,7 @@ To perform spike detection, you need:
 
 * a .dat file (which contains your raw unfiltered electrode data), 
 * a .probe file, which contains information about the electrode.
-* a .params file, which contains all other parameters
+* a outputfoldernameparams.py file, which contains all other parameters
 
 
 2) Probefiles:
@@ -92,7 +92,7 @@ set of channels for that shank
 
 2) Parameters to adjust
 ----------------------------
-Create a file called outputfoldernameparams.py where outputfoldernameparams is the name of your desired output folder. It should 
+Create a file called outputfoldernameparams.py where outputfoldernameparams is the name of your desired output folder in your local directory. It should 
 have the same form as the defaultparameters.py file in /spikedetekt/spikedetket/. It should contain the 
 following minimal information:
 
