@@ -3,17 +3,17 @@ SpikeDetekt
 
 This is a program for spike detection, that is optimized for high-channel count silicon probes.
 
-Contact: Kenneth Harris (firstname at cortexlab.net), Shabnam Kadir (firstname at cortexlab.net)
+Please send feedback to Kenneth Harris (firstname at cortexlab.net), Shabnam Kadir (firstname at cortexlab.net)
 
-Quick Start Guide for electrophysiologists (will become more comprehensive with time):
+Here is a quick Start Guide (will become more comprehensive with time):
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 0) Installation
 ----------------
 
-We recommend you use Python 2.6 or 2.7, e.g. a free academic version can be obtained from [Enthought Python](http://enthought.com/products/epd.php).
+SpikeDetekt is written in Python and should work on any OS. To install it, make sure you first have Python on your computer.
 
-
+We recommend you use Python 2.6 or 2.7 (don't use python 3.0!). A free academic distribution can be obtained from [Enthought Python](http://enthought.com/products/epd.php).
 
 Once you have set up Python on your system, go to the SpikeDetekt folder and type (on the command line):
 
