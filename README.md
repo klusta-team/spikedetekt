@@ -28,7 +28,7 @@ To perform spike detection, you need:
 
 * a .dat file (which contains your raw unfiltered electrode data), 
 * a .probe file, which contains information about the electrode.
-* a outputfoldernameparams.py file, which contains all other parameters
+* a .py file, which contains all other parameters
 
 
 2) Probefiles:
