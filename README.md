@@ -13,7 +13,7 @@ Here is a quick Start Guide (will become more comprehensive with time):
 
 SpikeDetekt is written in Python and should work on any OS. To install it, make sure you first have Python on your computer.
 
-We recommend you use Python 2.6 or 2.7 (don't use python 3.0!). A free academic distribution can be obtained from [Enthought Python](http://enthought.com/products/epd.php).
+We recommend you use Python 2.6 or 2.7 (don't use python 3.X!). A free academic distribution can be obtained from [Enthought Python](http://enthought.com/products/epd.php).
 
 Once you have set up Python on your system, go to the SpikeDetekt folder and type (on the command line):
 
@@ -21,8 +21,22 @@ Once you have set up Python on your system, go to the SpikeDetekt folder and typ
 
 This will install SpikeDetekt.
 
-1) Probefiles:
+1) Usage
+
+To perform spike detection, you need a .dat file (which contains your raw unfiltered electrode data), and a .probe file, which contains information about the electrode.
+
+
+2) Probefiles:
 ---------------
+
+
+I have included some examples of probe files:
+
+* buzsaki32.probe
+* linear16.probe
+* multishankslinear32.probe (an 8 shank example)
+
+
 
 Below are the instructions for a multi-shank probe (I hope this is clear from my example probe - otherwise do ask):
 
@@ -69,11 +83,6 @@ set of channels for that shank
 
 
 
-I have included some examples of probe files:
-
-* buzsaki32.probe
-* linear16.probe
-* multishankslinear32.probe (an 8 shank example)
 
 
 2) Parameters to adjust
