@@ -28,7 +28,7 @@ To perform spike detection, you need:
 
 * a .dat file (which contains your raw unfiltered electrode data), 
 * a .probe file, which contains information about the electrode.
-* a .py file, which contains all other parameters
+* a .params file, which contains all other parameters
 
 
 2) Probefiles:
@@ -92,8 +92,8 @@ set of channels for that shank
 
 2) Parameters to adjust
 ----------------------------
-Create a file called outputfoldernameparams.py where outputfoldernameparams is the name of your desired output folder in your local directory. It should 
-have the same form as the defaultparameters.py file in /spikedetekt/spikedetket/. It should contain the 
+Create a file called outputfoldernameparams.params where outputfoldernameparams is the name of your desired output folder in your local directory. It should 
+have the same form as the defaultparameters.py file in /spikedetekt/spikedetekt/. It should contain the 
 following minimal information:
 
     DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
@@ -109,7 +109,7 @@ following minimal information:
 
 You can specify an ordered list of .dat files to be concatenated, in the above example file1.dat, file2.dat and file3.dat are three
 recordings to be concatenated. By default the output files will be written to a folder
-called `outputfoldernameparams', where outputfoldernameparams.py is the name of your parameters file. 
+called `outputfoldername', where outputfoldername.params is the name of your parameters file. 
 
 The default parameters are as follows (see /spikedetekt/defaultparameters.py):
 
@@ -179,7 +179,7 @@ The default parameters are as follows (see /spikedetekt/defaultparameters.py):
     SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
     
     
-If you need parameters which differ from the default, include these in your outputfoldernameparams.py files. 
+If you need parameters which differ from the default, include these in your outputfoldername.params files. 
 
 
 3) Running
@@ -187,7 +187,7 @@ If you need parameters which differ from the default, include these in your outp
 
 Finally to run the program type:
 
-    python SpiKeDeteKt/scripts/detektspikes.py outputfoldernameparams.py
+    python SpiKeDeteKt/scripts/detektspikes.py outputfoldername.params
 
 
 
