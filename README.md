@@ -45,7 +45,7 @@ This will result in output files contained in a folder with the local name: myex
 
 2) Probefiles:
 ---------------
-A probe file is a text file containing the information pertaining to the spatial arrangement of electrodes on the probe. This information is presented in the following form: 
+A probe file is a text file containing the information pertaining to the spatial arrangement of electrodes on the probe. For each shank, give the pairs of neighbouring channel pairs that make up the probe's adjacency graph. This information is presented in the following form: 
 
 The general form of a .probe file for a multi-shank probe should take the following form:
 
@@ -67,6 +67,47 @@ The general form of a .probe file for a multi-shank probe should take the follow
 The file is a Python file which should define a dictionary variable probes,
 with keys the shank number, and values a list of channel pairs defining the
 edges of the graph.
+
+For the following 32 channel zig-zag probe the adjacency graph:
+
+The .probe file typically looks like this (depending on the labelling of your channels):
+
+    probes = {
+        # Probe 1
+	    1:[
+		    (0, 1), (0, 2),
+		    (1, 2), (1, 3),
+	    	(2, 3), (2, 4),
+	    	(3, 4), (3, 5),
+    		(4, 5), (4, 6),
+    		(5, 6), (5, 7),
+    		(6, 7), (6, 8),
+	    	(7, 8), (7, 9),
+		    (8, 9), (8, 10),
+    		(9, 10), (9, 11),
+    		(10, 11), (10, 12),
+    		(11, 12), (11, 13),
+    		(12, 13), (12, 14),
+    		(13, 14), (13, 15),
+    		(14, 15), (14, 16),
+    		(15, 16), (15, 17),
+    		(16, 17), (16, 18),
+    		(17, 18), (17, 19),
+	    	(18, 19), (18, 20),
+    		(19, 20), (19, 21),
+	    	(20, 21), (20, 22),
+	    	(21, 22), (21, 23),
+	    	(22, 23), (22, 24),
+	    	(23, 24), (23, 25),
+	    	(24, 25), (24, 26),
+	    	(25, 26), (25, 27),
+	    	(26, 27), (26, 28),
+	     	(27, 28), (27, 29),
+	    	(28, 29), (28, 30),
+	    	(29, 30), (29, 31),
+	    	(30, 31),
+		    ]
+	    }
 
 I have included some examples of probe files:
 
