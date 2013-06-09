@@ -72,7 +72,7 @@ For the following 32 channel zig-zag probe the adjacency graph:
 
 [![Screenshot 1](docs/images/adjacency.png)](docs/images/adjacency.PNG)
 
-The .probe file typically looks like this (depending on the labelling of your channels):
+The .probe file corresponding to the above probe would like something this with odd channels on one edge, even channels on the other (depending on the labelling of your channels):
 
     probes = {
         # Probe 1
