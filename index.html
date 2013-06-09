@@ -28,34 +28,59 @@
         </ul>
       </header>
       <section>
-        <h2>SpikeDetekt</h2>
+        <h2>
+<a name="spikedetekt" class="anchor" href="#spikedetekt"><span class="octicon octicon-link"></span></a>SpikeDetekt</h2>
 
-<p>This is a program for spike detection. It is in development.</p>
+<p>This is a program for spike detection, that is optimized for high-channel count silicon probes.</p>
 
-<p>Contact: Kenneth Harris (firstname at cortexlab.net), Shabnam Kadir (firstname at cortexlab.net)</p>
+<p>This software was developed at the <a href="http://www.ucl.ac.uk/cortexlab">Cortical Processing Laboratory</a> at UCL.</p>
 
-<h2>Quick Start Guide for electrophysiologists (will become more comprehensive with time):</h2>
+<p>Please send feedback to Kenneth Harris (firstname at cortexlab.net), Shabnam Kadir (firstname at cortexlab.net)</p>
 
-<h2>0) Installation</h2>
+<h2>
+<a name="here-is-a-quick-start-guide-will-become-more-comprehensive-with-time" class="anchor" href="#here-is-a-quick-start-guide-will-become-more-comprehensive-with-time"><span class="octicon octicon-link"></span></a>Here is a quick Start Guide (will become more comprehensive with time):</h2>
 
-<p>We recommend you use Python 2.6 or 2.7, e.g. a free academic version can be obtained from <a href="http://enthought.com/products/epd.php">Enthought Python</a>.</p>
+<h2>
+<a name="0-installation" class="anchor" href="#0-installation"><span class="octicon octicon-link"></span></a>0) Installation:</h2>
 
-<p>Once you have set up Python on your system, go to the SpikeDetekt folder and type (on the command line):</p>
+<p>SpikeDetekt is written in Python and should work on any OS. To install it, make sure you first have Python on your computer.</p>
+
+<p>We recommend you use Python 2.6 or 2.7 (don't use python 3.X!). A free academic distribution can be obtained from <a href="http://enthought.com/products/epd.php">Enthought Python</a>.</p>
+
+<p>Once you have set up Python on your system, download and unzip/tar either the .zip file or the tarball,
+go to the `spikedetekt' folder and type (on the command line):</p>
 
 <pre><code>python setup.py install
 </code></pre>
 
-<p>This will install SpikeDetekt.</p>
+<p>In the above,  'python' is the necessary command on your system for calling python. The file 'setup.py' is to be found in the unzipped folder spikedetekt. </p>
 
-<h2>1) Probefiles:</h2>
+<p>This will install SpikeDetekt. </p>
 
-<p>Below are the instructions for a multi-shank probe (I hope this is clear from my example probe - otherwise do ask):</p>
+<h2>
+<a name="1-usage" class="anchor" href="#1-usage"><span class="octicon octicon-link"></span></a>1) Usage:</h2>
 
-<p>Construct a probe object from a .probe file with:</p>
+<p>To perform spike detection, you need:</p>
 
-<p>probe = Probe(filename)</p>
+<ul>
+<li>a .dat file (which contains your raw unfiltered electrode data), </li>
+<li>a .probe file, which contains information about the electrode,</li>
+<li>a .params file, which contains all other parameters.</li>
+</ul><p>The above may have any combination of names. The name of your .params file will be the name of the folder where all the output will be stored. The simplest case is when you have the same name for all three files:</p>
 
-<p>The file should have a form something like:</p>
+<pre><code>myexperiment.dat
+myexperiment.probe
+myexperiment.params
+</code></pre>
+
+<p>This will result in output files contained in a folder with the local name: myexperiment.     </p>
+
+<h2>
+<a name="2-probefiles" class="anchor" href="#2-probefiles"><span class="octicon octicon-link"></span></a>2) Probefiles:</h2>
+
+<p>A probe file is a text file containing the information pertaining to the spatial arrangement of electrodes on the probe. This information is presented in the following form: </p>
+
+<p>The general form of a .probe file for a multi-shank probe should take the following form:</p>
 
 <pre><code>probes = {
     1: [
@@ -63,7 +88,12 @@
         (1, 2), (1, 3),
         ...
         ],
-    2: [...],
+    2: [
+       (13,15),(13,14),...
+        ],
+
+    shank number: [neighbouring channel pairs
+        ],
     ...
     }
 </code></pre>
@@ -72,51 +102,37 @@
 with keys the shank number, and values a list of channel pairs defining the
 edges of the graph.</p>
 
-<p>The Probe object has the following attributes:</p>
-
-<ul>
-<li><p>num_channels<br>
-The number of channels used (1+the maximum channel number referred to)</p></li>
-<li><p>channel_graph 
-A dictionary with keys the shank number, and values being graphs. A graph being a dictionary with keys the nodes (channel number) and values the set of all connected nodes. (So each channel in an edge is referred to twice in this data structure.)</p></li>
-<li><p>shanks_set
-   The set of shank numbers</p></li>
-<li><p>channel_set
-   A dictionary with keys the shank numbers, and values the 
-set of channels for that shank</p></li>
-<li><p>channel_to_shank
-   A dictionary with keys the channel numbers and values the corresponding shank number.</p></li>
-<li><p>probes
-   The raw probes dictionary definition in the file.</p></li>
-</ul><p>I have included some examples of probe files:</p>
+<p>I have included some examples of probe files:</p>
 
 <ul>
 <li>buzsaki32.probe</li>
 <li>linear16.probe</li>
 <li>multishankslinear32.probe (an 8 shank example)</li>
-</ul><h2>2) Parameters to adjust</h2>
+</ul><h2>
+<a name="3-running" class="anchor" href="#3-running"><span class="octicon octicon-link"></span></a>3) Running</h2>
 
-<p>Create a file called filename.params where filename is the name of your desired output folder. It should 
-have the same form as the defaultparameters.py file in /spikedetekt/spikedetket/. It should contain the 
-following minimal information:</p>
+<p>To run the program type the following into the command line:</p>
 
-<pre><code>DTYPE = "i2" # "&gt;i2" (&gt; means big-endian), "i4", "f2"
-# see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
+<pre><code>python spikedetekt/scripts/detektspikes.py myexperiment.params
+</code></pre>
 
-# Probe file (no default value provided)
-PROBE_FILE = 'probe_filename.probe'
+<p>See below on how to configure your parameter file, myexperiment.params according to the specifics of your experimental setup.</p>
 
-# Raw data files (no default values provided)
+<h2>
+<a name="4-parameters-to-adjust" class="anchor" href="#4-parameters-to-adjust"><span class="octicon octicon-link"></span></a>4) Parameters to adjust</h2>
+
+<p>Your myexperiment.params file should contain the following minimal information pertaining to the location of your .probe and .dat files on your system and some very basic information, such as the total number of channels used:</p>
+
+<pre><code>PROBE_FILE = 'probe_filename.probe'
+
 RAW_DATA_FILES = ['file1.dat', 'file2.dat','file3.dat']
 NCHANNELS = 32
 SAMPLERATE = 20000 # in Hertz
 </code></pre>
 
-<p>You can specify an ordered list of .dat files to be concatenated, in the above example file1.dat, file2.dat and file3.dat are three
-recordings to be concatenated. The output files will be written to a folder
-called `filename', where outputfoldernameparams.py is the name of your parameters file. </p>
+<p>You can specify an ordered list of .dat files to be concatenated, in the above example file1.dat, file2.dat and file3.dat are three recordings to be concatenated. </p>
 
-<p>The default parameters are as follows (see /spikedetekt/defaultparameters.py and change as desired):</p>
+<p>The default parameters are as follows (see spikedetekt/spikedetekt/defaultparameters.py):</p>
 
 <pre><code>DTYPE = "i2" # "&gt;i2" (&gt; means big-endian), "i4", "f2"
 # see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
@@ -184,28 +200,25 @@ DO_GLOBAL_CLUSTERING = False
 SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
 </code></pre>
 
-<p>If you need parameters which differ from the default, include these in your outputfoldernameparams.py files. </p>
+<p>If you need parameters which differ from the default, include these in your myexperiment.params file. </p>
 
-<h2>3) Running</h2>
+<h2>
+<a name="5-output" class="anchor" href="#5-output"><span class="octicon octicon-link"></span></a>5) Output</h2>
 
-<p>Finally to run the program type:</p>
-
-<pre><code>python SpiKeDeteKt/scripts/detektspikes.py outputfoldernameparams.py
-</code></pre>
-
-<h2>4) Output</h2>
-
-<p>SpiKeDeteKt will output the following files, where n is your shank number:</p>
+<p>SpikeDetekt will output the following files for each shank, where n is your shank number:</p>
 
 <ul>
 <li><p>.fet.n (feature file - required for all versions of KlustaKwik)</p></li>
 <li><p>.fmask.n (float masks for using with the new masked KlustaKwik)</p></li>
-<li><p>.mask.n (soon to be obsolete: binary masks for using with the new (masked) KlustaKwik)</p></li>
+<li><p>.mask.n (soon to be obsolete: binary masks for using with the new masked KlustaKwik)</p></li>
 <li><p>.spk.n (spike file)</p></li>
 <li><p>.upsk.n (unfiltered spike waveform)</p></li>
 <li><p>.res.n (list of spike times)</p></li>
 <li><p>.clu.n (a trivial clu file for use with Neuroscope, for observing spikes after detection, before clustering. Will be made redundant later)</p></li>
-<li><p>.xml (an xml file with all the parameters that can subsequently be used by Neuroscope or Klusters)</p></li>
+</ul><p>In addition, the following file will also be output:</p>
+
+<ul>
+<li><p>.xml (an xml file with the parameters that are needed by the data visualization programs: Neuroscope and Klusters). We now recommend using KlustaViewa for manual clustering.</p></li>
 <li><p>.fil (highpass filtered data)</p></li>
 <li><p>.h5 files (an <a href="http://en.wikipedia.org/wiki/Hierarchical_Data_Format">.h5</a> file duplicating a lot of the above data, which will later replace the above).
 .high.h5,
