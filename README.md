@@ -45,9 +45,11 @@ This will result in output files contained in a folder with the local name: myex
 
 2) Probefiles:
 ---------------
-A probe file is a text file containing the information pertaining to the spatial arrangement of electrodes on the probe. For each shank, give the pairs of neighbouring channel pairs that make up the probe's adjacency graph. This information is presented in the following form: 
+The probe file is a text file that contains information about the spatial arrangement of electrodes on the recording probe. SpikeDetekt needs this information because it detects spikes on high-count probes as spatiotemporally continuous threshold crossings. 
 
-The general form of a .probe file for a multi-shank probe should take the following form:
+The probe file must contain an "adjancy graph", the specifies all pairs of channels that are nearest neighbors. (Sometimes you will want to also include second-nearest neighbors in the graph too). 
+
+This information is presented in the following form:
 
     probes = {
         1: [
@@ -64,15 +66,13 @@ The general form of a .probe file for a multi-shank probe should take the follow
         ...
         }
 
-The file is a Python file which should define a dictionary variable probes,
-with keys the shank number, and values a list of channel pairs defining the
-edges of the graph.
+The probe file is actually formatted as a python command defining dictionary variable *probes*, with one key for each shank number, and values a list of neighboring channel pairs on that shank. If you don't know Python, don't worry, just think of it as a text file with the above format. 
 
-For the following 32 channel zig-zag probe the adjacency graph:
+As a more concrete example, for the following 32 channel zig-zag probe the adjacency graph is defined by the black lines:
 
 [![Screenshot 1](docs/images/adjacency.png)](docs/images/adjacency.PNG)
 
-The .probe file corresponding to the above probe would like something this with odd channels on one edge, even channels on the other (depending on the labelling of your channels):
+If there are odd channels on one edge, even channels on the other, the .probe file corresponding to the above probe would like something this: 
 
     probes = {
         # Probe 1
@@ -111,38 +111,25 @@ The .probe file corresponding to the above probe would like something this with 
 		    ]
 	    }
 
-I have included some examples of probe files:
+Further examples of probe files can be found in the distribution: 
 
 * buzsaki32.probe
 * linear16.probe
 * multishankslinear32.probe (an 8 shank example)
 
 
-3) Running
+3) Parameters to adjust
 ----------------------------
-
-To run the program type the following into the command line:
-
-    python spikedetekt/scripts/detektspikes.py myexperiment.params
- 
-See below on how to configure your parameter file, myexperiment.params according to the specifics of your experimental setup.
-
-
-
-4) Parameters to adjust
-----------------------------
-Your myexperiment.params file should contain the following minimal information pertaining to the location of your .probe and .dat files on your system and some very basic information, such as the total number of channels used:
-
+The parameter file (with a name something like myexperiment.params) contains further information about how to detect spikes. The following parameters, specifying the probe file name, the raw data files, number of recording channels and sample rate, are compulsary:
     
+    RAW_DATA_FILES = ['file1.dat', 'file2.dat','file3.dat']
+    SAMPLERATE = 20000 # in Hertz
+    NCHANNELS = 32
     PROBE_FILE = 'probe_filename.probe'
 
-    RAW_DATA_FILES = ['file1.dat', 'file2.dat','file3.dat']
-    NCHANNELS = 32
-    SAMPLERATE = 20000 # in Hertz
+Note that you can specify an ordered list of .dat files, which will be concatenated before spikes are detected.
 
-You can specify an ordered list of .dat files to be concatenated, in the above example file1.dat, file2.dat and file3.dat are three recordings to be concatenated. 
-
-The default parameters are as follows (see spikedetekt/spikedetekt/defaultparameters.py):
+There are also a lot of optional parameters. You should specify these if you want to override the default parameters, whose value appears in the file spikedetekt/spikedetekt/defaultparameters.py. Note that 
 
     DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
     # see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
@@ -211,6 +198,17 @@ The default parameters are as follows (see spikedetekt/spikedetekt/defaultparame
     
     
 If you need parameters which differ from the default, include these in your myexperiment.params file. 
+
+
+4) Running
+----------------------------
+
+To run the program type the following into the command line:
+
+    python spikedetekt/scripts/detektspikes.py myexperiment.params
+ 
+See below on how to configure your parameter file, myexperiment.params according to the specifics of your experimental setup.
+
 
 
 5) Output
