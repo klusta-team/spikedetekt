@@ -70,7 +70,9 @@ The probe file is actually formatted as a python command defining dictionary var
 
 As a more concrete example, for the following 32 channel zig-zag probe the adjacency graph is defined by the black lines:
 
-[![Screenshot 1](docs/images/adjacency.png)](docs/images/adjacency.PNG)
+<img src="docs/images/adjacency.png" height="750px" width="200px" />
+
+
 
 If there are odd channels on one edge, even channels on the other, the .probe file corresponding to the above probe would like something this: 
 
@@ -120,7 +122,7 @@ Further examples of probe files can be found in the distribution:
 
 3) Parameters to adjust
 ----------------------------
-The parameter file (with a name something like myexperiment.params) contains further information about how to detect spikes. The following parameters, specifying the probe file name, the raw data files, number of recording channels and sample rate, are compulsary:
+The parameter file (with a name something like myexperiment.params) contains further information about how to detect spikes. The following parameters, specifying the probe file name, the raw data files, number of recording channels and sample rate, are compulsory:
     
     RAW_DATA_FILES = ['file1.dat', 'file2.dat','file3.dat']
     SAMPLERATE = 20000 # in Hertz
