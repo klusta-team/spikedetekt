@@ -70,6 +70,8 @@ edges of the graph.
 
 For the following 32 channel zig-zag probe the adjacency graph:
 
+[![Screenshot 1](docs/images/adjacency.png)](docs/images/adjacency.PNG)
+
 The .probe file typically looks like this (depending on the labelling of your channels):
 
     probes = {
