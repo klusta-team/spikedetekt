@@ -129,7 +129,7 @@ The parameter file (with a name something like myexperiment.params) contains fur
 
 Note that you can specify an ordered list of .dat files, which will be concatenated before spikes are detected.
 
-There are also a lot of optional parameters. You should specify these if you want to override the default parameters, whose value appears in the file spikedetekt/spikedetekt/defaultparameters.py. Note that 
+There are also a lot of optional parameters. You should specify these in your parameter file if you want to override the default parameters, whose value appears in the file spikedetekt/spikedetekt/defaultparameters.py. Note that the parameter files are also python scripts, but again you don't need to worry about this, just think of them as text files. The values of the other parameters, and their default values, are below. Feel free to ignore  
 
     DTYPE = "i2" # ">i2" (> means big-endian), "i4", "f2"
     # see http://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html#arrays-dtypes-constructing
