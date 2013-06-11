@@ -17,14 +17,27 @@ All options must be specified in the parameters file.
 '''
 
 if __name__=='__main__':
-    if len(sys.argv)<=1 or len(sys.argv)>2:
+    if len(sys.argv)<=1:# or len(sys.argv)>2:
         print usage.strip()
         exit()
         
     # Read parameters file
     parameters_file = sys.argv[1]
+    extrafields = sys.argv[2:]
     try:
-        execfile(parameters_file, Parameters)
+        if not extrafields:
+            execfile(parameters_file, Parameters)
+        else:
+            # Read the parameters file.
+            with open(parameters_file) as f:
+                parameters_text = f.read()
+            # Do the replacements.
+            for extrafield in extrafields:
+                # fields[0] is a field name (e.g. %FILE%), fields[1] is the value
+                fields = extrafield.split('=')
+                parameters_text = parameters_text.replace(
+                    '%' + fields[0] + '%', fields[1])
+            exec(parameters_text, Parameters)
     except IOError:
         print 'Parameters file %s does not exist or cannot be read.' % parameters_file
         exit()
