@@ -184,6 +184,16 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
     
     # get block of given size around peaksample
     s_peak = int(s_fracpeak)
+    try:
+        s_peak = int(s_fracpeak)
+    except ValueError:
+        # This is a bit of a hack. Essentially, the problem here is that
+        # s_fracpeak is a nan because the interpolation didn't work, and
+        # therefore we want to skip the spike. There's already code in
+        # core.extract_spikes that does this if a LinAlgError is raised,
+        # so we just use that to skip this spike (and write a message to the
+        # log).
+        raise np.linalg.LinAlgError 
     WaveBlock = get_padded(FilteredArr,
                            s_peak-s_before-1, s_peak+s_after+2)
     
