@@ -45,7 +45,7 @@ def datfile_sizes(DatFileNames, n_ch_dat):
     n_samples = [num_samples(DatFileName,
                              n_ch_dat,
                              n_bytes=dtype_size) for DatFileName in DatFileNames]
-    n_samples = np.array(n_samples, dtype=int)
+    n_samples = np.array(n_samples, dtype=np.int64)
     offsets = np.hstack((0, np.cumsum(n_samples)))
     return n_samples, offsets
 
