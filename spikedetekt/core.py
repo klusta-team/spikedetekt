@@ -66,12 +66,15 @@ def spike_detection_job(DatFileNames, ProbeFileName, output_dir, output_name):
     
     basename = basenamefolder = output_name
         
-    OutDir = join(output_dir, basenamefolder)
+   # OutDir = join(output_dir, basenamefolder)
+    OutDir = output_dir
     with indir(OutDir):    
         # Create a log file
         GlobalVariables['log_fd'] = open(basename+'.log', 'w')    
         
         Channels_dat = np.arange(probe.num_channels)
+        # Print Parameters dictionary to .log file
+        log_message("\n".join(["{0:s} = {1:s}".format(key, str(value)) for key, value in Parameters.iteritems() if not key.startswith('_')]))
         spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat,
                                       Channels_dat, probe.channel_graph,
                                       probe, max_spikes)
@@ -79,6 +82,8 @@ def spike_detection_job(DatFileNames, ProbeFileName, output_dir, output_name):
         numwarn = GlobalVariables['warnings']
         if numwarn:
             log_message('WARNINGS ENCOUNTERED: '+str(numwarn)+', check log file.')
+    # Print Parameters dictionary to .log file
+    #log_message("\n".join(["{0:s} = {1:s}".format(key, str(value)) for key, value in Parameters.iteritems()]))
             
 
 def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat,

@@ -13,16 +13,36 @@ or to load several, do something like:
     N_CH, S_TOTAL, FPC = eval('(N_CH, S_TOTAL, FPC)', Parameters)
     
 '''
-from defaultparameters import *
 
-__all__ = ['Parameters', 'GlobalVariables']
+import os
 
-Parameters = dict((k, v) for k, v in globals().iteritems() if not k.startswith('_'))
-GlobalVariables = {
+try:
+    Parameters
+except NameError:
+    Parameters = {}
+    defaultparameters = os.path.join(os.path.dirname(os.path.realpath(__file__)), "defaultparameters.py")
+    #print "filling parameters dict with default", defaultparameters
+    execfile(defaultparameters, {}, Parameters)
+    #print "Printing the famous Parameters dict", Parameters
+
+try:
+    GlobalVariables
+except NameError:
+    GlobalVariables = {
     'warnings':0,
     'log_fd':None,
     }
 
-if __name__=='__main__':
-    print GlobalParameters.keys()
-    
+#from defaultparameters import *
+
+__all__ = ['Parameters', 'GlobalVariables']
+
+#Parameters = dict((k, v) for k, v in globals().iteritems() if not k.startswith('_'))
+#GlobalVariables = {
+#    'warnings':0,
+#    'log_fd':None,
+#    }
+
+
+
+

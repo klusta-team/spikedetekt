@@ -26,7 +26,7 @@ if __name__=='__main__':
     extrafields = sys.argv[2:]
     try:
         if not extrafields:
-            execfile(parameters_file, Parameters)
+            execfile(parameters_file, {}, Parameters)
         else:
             # Read the parameters file.
             with open(parameters_file) as f:
@@ -37,7 +37,7 @@ if __name__=='__main__':
                 fields = extrafield.split('=')
                 parameters_text = parameters_text.replace(
                     '%' + fields[0] + '%', fields[1])
-            exec(parameters_text, Parameters)
+            exec(parameters_text, {}, Parameters)
     except IOError:
         print 'Parameters file %s does not exist or cannot be read.' % parameters_file
         exit()
