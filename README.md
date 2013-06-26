@@ -19,11 +19,11 @@ We recommend you use Python 2.6 or 2.7 (don't use python 3.X!). A free academic 
 
 SpikeDetekt requires the following Python packages to be installed:
 
-*NumPy
-*SciPy
-*PyTables
-*Cjson
-*h5py
+* NumPy
+* SciPy
+* PyTables
+* Cjson
+* h5py
 
 Once you have set up Python on your system, download and unzip/tar either the .zip file or the tarball,
 go to the `spikedetekt' folder and type (on the command line):
