@@ -17,6 +17,14 @@ SpikeDetekt is written in Python and should work on any OS. To install it, make 
 
 We recommend you use Python 2.6 or 2.7 (don't use python 3.X!). A free academic distribution can be obtained from [Enthought Python](http://enthought.com/products/epd.php).
 
+SpikeDetekt requires the following Python packages to be installed:
+
+*NumPy
+*SciPy
+*PyTables
+*Cjson
+*h5py
+
 Once you have set up Python on your system, download and unzip/tar either the .zip file or the tarball,
 go to the `spikedetekt' folder and type (on the command line):
 
