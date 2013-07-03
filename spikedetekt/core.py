@@ -187,6 +187,10 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
 
     for h5 in h5s.values():
         h5.close()
+    
+    # Close the log file at the end.
+    if 'log_fd' in GlobalVariables:
+        GlobalVariables['log_fd'].close()
                 
 ###########################################################
 ############# Spike extraction helper functions ###########    

@@ -54,6 +54,9 @@ if __name__=='__main__':
     
     try:
         raw_data_files = Parameters['RAW_DATA_FILES']
+        # Convert a string into a list with one element.
+        if isinstance(raw_data_files, basestring):
+            raw_data_files = [raw_data_files]
     except KeyError:
         print 'Parameters file needs a RAW_DATA_FILES option.'
         exit()
