@@ -8,7 +8,7 @@ from utils import get_padded
 from parameters import Parameters, GlobalVariables
 from log import log_warning
 
-def extract_wave(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
+def extract_wave(IndList, FilteredArr, s_before, s_after, n_ch, s_start,Threshold):
     '''
     Extract an aligned wave corresponding to a spike.
     
@@ -37,7 +37,7 @@ def extract_wave(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
     '''
     if Parameters['USE_WEIGHTED_MEAN_PEAK_SAMPLE'] or Parameters['UPSAMPLING_FACTOR']>1:
         return extract_wave_new(IndList, FilteredArr,
-                                s_before, s_after, n_ch, s_start)
+                                s_before, s_after, n_ch, s_start,Threshold)
     IndArr = np.array(IndList, dtype=np.int32)
     SampArr = IndArr[:, 0]
     log_fd = GlobalVariables['log_fd']
@@ -107,7 +107,7 @@ def interp_around_peak(X_sc, i_intpeak, c_peak, s_before, s_after):
     s_fracpeak = max_t(a_b_c)
     return interp_around(X_sc, s_fracpeak, s_before, s_after)
 
-def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
+def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start,Threshold):
     IndArr = np.array(IndList, dtype=np.int32)
     SampArr = IndArr[:, 0]
     ChArr = IndArr[:, 1]
@@ -164,7 +164,7 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
             a_b_c = abc(np.arange(left, right, dtype=np.float32),
                         X[left:right])
             s_fracpeak = max_t(a_b_c)
-            weight = -X[i_intpeak]
+            weight = -(X[i_intpeak]+Threshold[ch])
             if weight<0:
                 weight = 0
             peak_sum += s_fracpeak*weight
@@ -183,7 +183,6 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
     # s_fracpeak now in coordinates of FilteredArr
     
     # get block of given size around peaksample
-    s_peak = int(s_fracpeak)
     try:
         s_peak = int(s_fracpeak)
     except ValueError:
