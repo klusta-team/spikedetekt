@@ -265,7 +265,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             try:
                 wave, s_peak, cm = extract_wave(IndList, FilteredChunk,
                                                 S_BEFORE, S_AFTER, N_CH,
-                                                s_start)
+                                                s_start,Threshold)
                 s_offset = s_start+s_peak
                 if keep_start<=s_offset<keep_end:
                     spike_count += 1
