@@ -183,7 +183,6 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
     # s_fracpeak now in coordinates of FilteredArr
     
     # get block of given size around peaksample
-    s_peak = int(s_fracpeak)
     try:
         s_peak = int(s_fracpeak)
     except ValueError:

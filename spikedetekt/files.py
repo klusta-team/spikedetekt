@@ -109,6 +109,17 @@ class FilWriter(object):
         self.objs_and_offsets = zip(self.fileobjs,
                                     self.offsets[:-1], self.offsets[1:])
                 
+        # create .binf files, one for each .dat file, with matching names
+        self.filenames_bin = [basename_noext(n)+'.bin.fil' for n in DatFileNames]
+        if len(self.filenames_bin)>len(set(self.filenames_bin)):
+        # in case the base filename is used multiple times, we write out
+        # the number of the datfile as well 
+            self.filenames_bin = [basename_noext(n)+'_'+str(i)+'.bin.fil' for i, n in enumerate(DatFileNames)]
+        self.fileobjs_bin = [open(n, 'wb') for n in self.filenames_bin]
+        # self.n_samples, self.offsets = datfile_sizes(DatFileNames, n_ch_dat)
+        self.objs_and_offsets_bin = zip(self.fileobjs_bin,
+                                self.offsets[:-1], self.offsets[1:])
+                
     def write(self, FilteredChunk, s_start, s_end, keep_start, keep_end):
         if not Parameters['WRITE_FIL_FILE']:
             return
@@ -129,6 +140,24 @@ class FilWriter(object):
                 a_end = i_end-keep_start
                 fd.write(FilteredChunkInt[a_start:a_end, :].flatten())
 
+    def write_bin(self, BinaryChunk, s_start, s_end, keep_start, keep_end):
+        if s_end>keep_end: # writing out the binary filtered data
+            BinaryChunkInt = BinaryChunk[keep_start-s_start:keep_end-s_end, :]
+            BinaryChunkInt = np.int16(BinaryChunkInt)
+        else: # we're in the end
+            BinaryChunkInt = np.int16(BinaryChunk[keep_start-s_start:, :])
+        for fd, f_start, f_end in self.objs_and_offsets_bin:
+            # find the intersection of [f_start, f_end] and [s_start, s_end]
+            i_start = max(f_start, keep_start)
+            i_end = min(f_end, keep_end)
+            # intersection is nonzero if i_end>i_start only
+            if i_end>i_start:
+                # start and end of intersection as an offset into the file in
+                # samples
+                a_start = i_start-keep_start
+                a_end = i_end-keep_start
+                fd.write(BinaryChunkInt[a_start:a_end, :].flatten())
+        
 
 def get_chunk_for_thresholding(fd, n_ch_dat, ChannelsToUse, n_samples):
     '''
@@ -244,7 +273,10 @@ def write_trivial_clu(restimes,filepath):
     clus = np.zeros_like(restimes) 
     clu_file = open( filepath,'w')
     #header line: number of clusters
-    n_clu = clus.max()+1
+    if len(clus) == 0:
+        n_clu = 1
+    else:
+        n_clu = clus.max() + 1
     clu_file.write( '%i\n'%n_clu)
     #one cluster per line
     np.savetxt(clu_file,np.int16(clus),fmt="%i")

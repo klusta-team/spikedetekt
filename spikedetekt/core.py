@@ -84,6 +84,10 @@ def spike_detection_job(DatFileNames, ProbeFileName, output_dir, output_name):
             log_message('WARNINGS ENCOUNTERED: '+str(numwarn)+', check log file.')
     # Print Parameters dictionary to .log file
     #log_message("\n".join(["{0:s} = {1:s}".format(key, str(value)) for key, value in Parameters.iteritems()]))
+    
+    # Close the log file at the end.
+    if 'log_fd' in GlobalVariables:
+        GlobalVariables['log_fd'].close()
             
 
 def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat,
@@ -174,6 +178,8 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
     # Feature extraction
     for shank in probe.shanks_set:
         X = shank_table['waveforms', shank].cols.wave[:Parameters['PCA_MAXWAVES']]
+        if len(X) == 0:
+            continue
         PC_3s = reget_features(X)
         for sd_row, w_row in izip(shank_table['spikedetekt', shank],
                                   shank_table['waveforms', shank]):
@@ -187,10 +193,6 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
 
     for h5 in h5s.values():
         h5.close()
-    
-    # Close the log file at the end.
-    if 'log_fd' in GlobalVariables:
-        GlobalVariables['log_fd'].close()
                 
 ###########################################################
 ############# Spike extraction helper functions ###########    
@@ -231,15 +233,22 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
                                               num_samples(DatFileNames[0],
                                                           n_ch_dat))
         FilteredChunk = apply_filtering(filter_params, DatChunk)
+        first_chunks_std = np.std(FilteredChunk)
+        Threshold = 25
+        
+        # NEW: HILBERT TRANSFORM
+        # FilteredChunk = np.abs(signal.hilbert(FilteredChunk, axis=0)) ** 2
+        
+        
+        # FilteredChunkNormalized = FilteredChunk * 1. / np.std(FilteredChunk)
         # .6745 converts median to standard deviation
-        if Parameters['USE_SINGLE_THRESHOLD']:
-            ThresholdSDFactor = np.median(np.abs(FilteredChunk))/.6745
-        else:
-            ThresholdSDFactor = np.median(np.abs(FilteredChunk), axis=0)/.6745
-        Threshold = ThresholdSDFactor*THRESH_SD
+        # if Parameters['USE_SINGLE_THRESHOLD']:
+            # ThresholdSDFactor = np.median(np.abs(FilteredChunk))/.6745
+        # else:
+            # ThresholdSDFactor = np.median(np.abs(FilteredChunk), axis=0)/.6745
+        # Threshold = ThresholdSDFactor*THRESH_SD
     
     n_samples = num_samples(DatFileNames, n_ch_dat)
-    
     spike_count = 0
     for (DatChunk, s_start, s_end,
          keep_start, keep_end) in chunks(DatFileNames, n_ch_dat, ChannelsToUse):
@@ -250,15 +259,32 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         fil_writer.write(FilteredChunk, s_start, s_end, keep_start, keep_end)
 
         ############## THRESHOLDING #####################################
-        if Parameters['DETECT_POSITIVE']:
-            BinaryChunk = np.abs(FilteredChunk)>Threshold
-        else:
-            BinaryChunk = (FilteredChunk<-Threshold)
+        
+        
+        # NEW: HILBERT TRANSFORM
+        FilteredChunkHilbert = np.abs(signal.hilbert(FilteredChunk, axis=0) / first_chunks_std) ** 2
+        BinaryChunk = FilteredChunkHilbert > Threshold
+        
+        # print BinaryChunk.shape
+        # import matplotlib.pyplot as plt
+        # import galry as plt
+        # plt.figure()
+        # plt.imshow(BinaryChunk[:1000,:].T * 1.)
+        # plt.show()
+        
+        # if Parameters['DETECT_POSITIVE']:
+        # BinaryChunk = np.abs(FilteredChunkNormalized)>Threshold
+        # else:
+            # BinaryChunk = (FilteredChunkNormalized<-Threshold)
         BinaryChunk = BinaryChunk.astype(np.int8)
         ############### FLOOD FILL  ######################################
         ChannelGraphToUse = complete_if_none(ChannelGraph, N_CH)
         IndListsChunk = connected_components(BinaryChunk,
                             ChannelGraphToUse, S_JOIN_CC)
+        
+        fil_writer.write_bin(BinaryChunk, s_start, s_end, keep_start, keep_end)
+        
+        print len(IndListsChunk)
         ############## ALIGN AND INTERPOLATE WAVES #######################
         nextbits = []
         for IndList in IndListsChunk:
@@ -282,7 +308,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             cm = add_penumbra(cm, ChannelGraphToUse,
                               Parameters['PENUMBRA_SIZE'])
             fcm = get_float_mask(wave, cm, ChannelGraphToUse,
-                                 ThresholdSDFactor)
+                                 1.)
             yield uwave, wave, s, cm, fcm
         progress_bar.update(float(s_end)/n_samples,
             '%d/%d samples, %d spikes found'%(s_end, n_samples, spike_count))
