@@ -233,21 +233,13 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
                                               num_samples(DatFileNames[0],
                                                           n_ch_dat))
         FilteredChunk = apply_filtering(filter_params, DatChunk)
+        # get the STD of the beginning of the filtered data
         first_chunks_std = np.std(FilteredChunk)
-        Threshold = 25
         
-        # NEW: HILBERT TRANSFORM
-        # FilteredChunk = np.abs(signal.hilbert(FilteredChunk, axis=0)) ** 2
+    # set the high and low thresholds 
+    ThresholdStrong = 25
+    ThresholdWeak = 15
         
-        
-        # FilteredChunkNormalized = FilteredChunk * 1. / np.std(FilteredChunk)
-        # .6745 converts median to standard deviation
-        # if Parameters['USE_SINGLE_THRESHOLD']:
-            # ThresholdSDFactor = np.median(np.abs(FilteredChunk))/.6745
-        # else:
-            # ThresholdSDFactor = np.median(np.abs(FilteredChunk), axis=0)/.6745
-        # Threshold = ThresholdSDFactor*THRESH_SD
-    
     n_samples = num_samples(DatFileNames, n_ch_dat)
     spike_count = 0
     for (DatChunk, s_start, s_end,
@@ -263,24 +255,20 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         
         # NEW: HILBERT TRANSFORM
         FilteredChunkHilbert = np.abs(signal.hilbert(FilteredChunk, axis=0) / first_chunks_std) ** 2
-        BinaryChunk = FilteredChunkHilbert > Threshold
+        BinaryChunkWeak = FilteredChunkHilbert > ThresholdWeak
+        BinaryChunkStrong = FilteredChunkHilbert > ThresholdStrong
         
-        # print BinaryChunk.shape
-        # import matplotlib.pyplot as plt
-        # import galry as plt
-        # plt.figure()
-        # plt.imshow(BinaryChunk[:1000,:].T * 1.)
-        # plt.show()
         
-        # if Parameters['DETECT_POSITIVE']:
-        # BinaryChunk = np.abs(FilteredChunkNormalized)>Threshold
-        # else:
-            # BinaryChunk = (FilteredChunkNormalized<-Threshold)
-        BinaryChunk = BinaryChunk.astype(np.int8)
+        
+        BinaryChunkWeak = BinaryChunkWeak.astype(np.int8)
+        BinaryChunkStrong = BinaryChunkStrong.astype(np.int8)
         ############### FLOOD FILL  ######################################
         ChannelGraphToUse = complete_if_none(ChannelGraph, N_CH)
-        IndListsChunk = connected_components(BinaryChunk,
+        IndListsChunk = connected_components(BinaryChunkWeak, BinaryChunkStrong,
                             ChannelGraphToUse, S_JOIN_CC)
+        
+        
+        BinaryChunk = 1 * BinaryChunkWeak + 1 * BinaryChunkStrong
         
         fil_writer.write_bin(BinaryChunk, s_start, s_end, keep_start, keep_end)
         

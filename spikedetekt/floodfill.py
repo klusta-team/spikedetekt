@@ -5,15 +5,27 @@ from numpy import *
 from itertools import izip
 import numpy as np
 
-def connected_components(st_arr, ch_graph, s_back):
+def connected_components(st_arr, st_arr_strong, ch_graph, s_back):
     '''
     Returns a list of pairs (samp, chan) of the connected components in the 2D
     array st_arr, where a pair is adjacent if the samples are within s_back of
     each other, and the channels are adjacent in ch_graph, the channel graph.
     '''
+    
+    # NEW: two thresholds
+    # st_arr is the weak
+    # st_arr_strong is the strong
+    assert st_arr.shape == st_arr_strong.shape
+    # set of connected component labels which contain at least one strong 
+    # node
+    strong_nodes = set()
+    
     n_s, n_ch = st_arr.shape
     s_back = int(s_back)
+    
+    # an array with the component label for each node in the chunk
     label_buffer = np.zeros((n_s, n_ch), dtype=int32)
+    
     # component indices, a dictionary with keys the label of the component
     # and values a list of pairs (sample, channel) belonging to that component  
     comp_inds = {}
@@ -78,6 +90,12 @@ def connected_components(st_arr, ch_graph, s_back):
                         # add them to the current label list, and remove the
                         # adjacent component entirely
                         comp_inds[curlabel].extend(comp_inds.pop(adjlabel))
+                        
+                    # NEW: add the current component label to the set of all
+                    # strong nodes, if the current node is strong
+                    if curlabel > 0 and st_arr_strong[i_s, i_ch]:
+                        strong_nodes.add(curlabel)
+                        
         if label_buffer[i_s, i_ch]==0:
             # if nothing is adjacent, we have the beginnings of a new component,
             # so we label it, create a new list for the new component which is
@@ -86,5 +104,6 @@ def connected_components(st_arr, ch_graph, s_back):
             label_buffer[i_s, i_ch] = c_label
             comp_inds[c_label] = [(i_s, i_ch)]
             c_label += 1
+            
     # only return the values, because we don't actually need the labels
-    return comp_inds.values()
+    return [comp_inds[key] for key in comp_inds.keys() if key in strong_nodes]
