@@ -8,7 +8,7 @@ from utils import get_padded
 from parameters import Parameters, GlobalVariables
 from log import log_warning
 
-def extract_wave(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
+def extract_wave(IndList, FilteredArr, FilteredHilbertArr, s_before, s_after, n_ch, s_start):
     '''
     Extract an aligned wave corresponding to a spike.
     
@@ -36,7 +36,7 @@ def extract_wave(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
         channels, with value 1 if the channel is used and 0 otherwise.
     '''
     if Parameters['USE_WEIGHTED_MEAN_PEAK_SAMPLE'] or Parameters['UPSAMPLING_FACTOR']>1:
-        return extract_wave_new(IndList, FilteredArr,
+        return extract_wave_new(IndList, FilteredArr, FilteredHilbertArr,
                                 s_before, s_after, n_ch, s_start)
     IndArr = np.array(IndList, dtype=np.int32)
     SampArr = IndArr[:, 0]
@@ -107,7 +107,8 @@ def interp_around_peak(X_sc, i_intpeak, c_peak, s_before, s_after):
     s_fracpeak = max_t(a_b_c)
     return interp_around(X_sc, s_fracpeak, s_before, s_after)
 
-def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
+def extract_wave_new(IndList, FilteredArr, FilteredHilbertArr, s_before, 
+                     s_after, n_ch, s_start, ThresholdStrong, ThresholdWeak):
     IndArr = np.array(IndList, dtype=np.int32)
     SampArr = IndArr[:, 0]
     ChArr = IndArr[:, 1]
@@ -135,6 +136,7 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
     # 1. upsample channels we're using on thresholded range
     # 2. find weighted mean peak sample
     SampArrMin, SampArrMax = np.amin(SampArr)-3, np.amax(SampArr)+4
+    # ChArrMin, ChArrMax = np.amin(ChArr), np.amax(ChArr)
     WavePlus = get_padded(FilteredArr, SampArrMin, SampArrMax)
     WavePlus = WavePlus[:, ChMask]
     # upsample WavePlus
@@ -202,4 +204,16 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start):
     f = interp1d(old_s, WaveBlock, bounds_error=True, kind='cubic', axis=0)
     Wave = f(new_s)
     
-    return Wave, s_peak, ChMask
+    
+    # NEW: FLOAT MASK
+    #################################
+    comp = np.zeros((SampArrMax - SampArrMin, n_ch), dtype=FilteredHilbertArr.dtype)
+    comp[SampArr - SampArrMin, ChArr] = FilteredHilbertArr[SampArr, ChArr]
+    # 1D array: for each channel, the peak of the Hilbert, relative to the
+    # start of the chunk
+    peaks = np.argmax(comp, axis=0) + SampArrMin
+    # 1D array: values of the peaks, on each channel
+    peaks_values = FilteredHilbertArr[peaks, np.arange(0, n_ch)] * ChMask
+    FloatChMask = np.clip((peaks_values - ThresholdWeak) / (ThresholdStrong - ThresholdWeak), 0, 1)
+    
+    return Wave, s_peak, ChMask, FloatChMask

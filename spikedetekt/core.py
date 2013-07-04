@@ -17,7 +17,7 @@ from files import (num_samples, klusters_files,
                    waveform_description, FilWriter)
 from filtering import apply_filtering, get_filter_params
 from progressbar import ProgressReporter
-from alignment import extract_wave
+from alignment import extract_wave, extract_wave_new
 from os.path import join, abspath, dirname
 from parameters import Parameters, GlobalVariables
 from time import sleep
@@ -277,26 +277,27 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         nextbits = []
         for IndList in IndListsChunk:
             try:
-                wave, s_peak, cm = extract_wave(IndList, FilteredChunk,
+                wave, s_peak, cm, fcm = extract_wave_new(IndList, FilteredChunk,
+                                                FilteredChunkHilbert,
                                                 S_BEFORE, S_AFTER, N_CH,
-                                                s_start)
+                                                s_start, ThresholdStrong, ThresholdWeak)
                 s_offset = s_start+s_peak
                 if keep_start<=s_offset<keep_end:
                     spike_count += 1
-                    nextbits.append((wave, s_offset, cm))
+                    nextbits.append((wave, s_offset, cm, fcm))
             except np.linalg.LinAlgError:
                 s = '*** WARNING *** Unalignable spike discarded in chunk {chunk}.'.format(
                         chunk=(s_start, s_end))
                 log_warning(s)
         # and return them in time sorted order
-        nextbits.sort(key=lambda (wave, s, cm): s)
-        for wave, s, cm in nextbits:
+        nextbits.sort(key=lambda (wave, s, cm, fcm): s)
+        for wave, s, cm, fcm in nextbits:
             uwave = get_padded(DatChunk, int(s)-S_BEFORE-s_start,
                                int(s)+S_AFTER-s_start).astype(np.int32)
-            cm = add_penumbra(cm, ChannelGraphToUse,
-                              Parameters['PENUMBRA_SIZE'])
-            fcm = get_float_mask(wave, cm, ChannelGraphToUse,
-                                 1.)
+            # cm = add_penumbra(cm, ChannelGraphToUse,
+                              # Parameters['PENUMBRA_SIZE'])
+            # fcm = get_float_mask(wave, cm, ChannelGraphToUse,
+                                 # 1.)
             yield uwave, wave, s, cm, fcm
         progress_bar.update(float(s_end)/n_samples,
             '%d/%d samples, %d spikes found'%(s_end, n_samples, spike_count))
