@@ -17,7 +17,7 @@ from files import (num_samples, klusters_files,
                    waveform_description, FilWriter)
 from filtering import apply_filtering, get_filter_params
 from progressbar import ProgressReporter
-from alignment import extract_wave, extract_wave_new
+from alignment import extract_wave, extract_wave_new, InterpolationError
 from os.path import join, abspath, dirname
 from parameters import Parameters, GlobalVariables
 from time import sleep
@@ -287,6 +287,10 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
                     nextbits.append((wave, s_offset, cm, fcm))
             except np.linalg.LinAlgError:
                 s = '*** WARNING *** Unalignable spike discarded in chunk {chunk}.'.format(
+                        chunk=(s_start, s_end))
+                log_warning(s)
+            except InterpolationError:
+                s = '*** WARNING *** Interpolation error in chunk {chunk}.'.format(
                         chunk=(s_start, s_end))
                 log_warning(s)
         # and return them in time sorted order

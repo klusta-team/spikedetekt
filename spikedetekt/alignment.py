@@ -8,6 +8,9 @@ from utils import get_padded
 from parameters import Parameters, GlobalVariables
 from log import log_warning
 
+class InterpolationError(Exception):
+    pass
+
 def extract_wave(IndList, FilteredArr, FilteredHilbertArr, s_before, s_after, n_ch, s_start):
     '''
     Extract an aligned wave corresponding to a spike.
@@ -239,7 +242,13 @@ def extract_wave_new(IndList, FilteredArr, FilteredHilbertArr, s_before,
     # Perform interpolation around the fractional peak
     old_s = np.arange(s_peak-s_before-1, s_peak+s_after+2)
     new_s = np.arange(s_peak-s_before, s_peak+s_after)+(s_fracpeak-s_peak)
-    f = interp1d(old_s, WaveBlock, bounds_error=True, kind='cubic', axis=0)
+    try:
+        f = interp1d(old_s, WaveBlock, bounds_error=True, kind='cubic', axis=0)
+    except ValueError: 
+        #  File "/usr/lib/python2.7/dist-packages/scipy/interpolate/interpolate.py", line 509, in _dot0
+        #  return dot(a, b)
+        #ValueError: matrices are not aligned
+        raise InterpolationError
     Wave = f(new_s)
     
     
