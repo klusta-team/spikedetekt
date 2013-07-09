@@ -143,55 +143,55 @@ def extract_wave_new(IndList, FilteredArr, FilteredHilbertArr, s_before,
     # ChArrMin, ChArrMax = np.amin(ChArr), np.amax(ChArr)
     
     
-    # WavePlus = get_padded(FilteredArr, SampArrMin, SampArrMax)
-    # WavePlus = WavePlus[:, ChMask]
+    WavePlus = get_padded(FilteredArr, SampArrMin, SampArrMax)
+    WavePlus = WavePlus[:, ChMask]
     
-    # # upsample WavePlus
-    # upsampling_factor = Parameters['UPSAMPLING_FACTOR']
-    # if upsampling_factor>1:
-        # old_s = np.arange(WavePlus.shape[0])
-        # new_s_i = np.arange((WavePlus.shape[0]-1)*upsampling_factor+1)
-        # new_s = np.array(new_s_i*(1.0/upsampling_factor), dtype=np.float32)
-        # f = interp1d(old_s, WavePlus, bounds_error=True, kind='cubic', axis=0)
-        # UpsampledWavePlus = f(new_s)
-    # else:
-        # UpsampledWavePlus = WavePlus
+    # upsample WavePlus
+    upsampling_factor = Parameters['UPSAMPLING_FACTOR']
+    if upsampling_factor>1:
+        old_s = np.arange(WavePlus.shape[0])
+        new_s_i = np.arange((WavePlus.shape[0]-1)*upsampling_factor+1)
+        new_s = np.array(new_s_i*(1.0/upsampling_factor), dtype=np.float32)
+        f = interp1d(old_s, WavePlus, bounds_error=True, kind='cubic', axis=0)
+        UpsampledWavePlus = f(new_s)
+    else:
+        UpsampledWavePlus = WavePlus
         
     # find weighted mean peak for each channel above threshold
-    # if Parameters['USE_WEIGHTED_MEAN_PEAK_SAMPLE']:
-        # peak_sum = 0.0
-        # total_weight = 0.0
-        # for ch in xrange(WavePlus.shape[1]):
-            # X = UpsampledWavePlus[:, ch]
-            # if Parameters['DETECT_POSITIVE']:
-                # X = -np.abs(X)
-            # i_intpeak = np.argmin(X)
-            # left, right = i_intpeak-1, i_intpeak+2
-            # if right>len(X):
-                # left, right = left+len(X)-right, len(X)
-            # elif left<0:
-                # left, right = 0, right-left
-            # a_b_c = abc(np.arange(left, right, dtype=np.float32),
-                        # X[left:right])
-            # s_fracpeak = max_t(a_b_c)
-            # weight = -X[i_intpeak]
-            # if weight<0:
-                # weight = 0
-            # peak_sum += s_fracpeak*weight
-            # total_weight += weight
-        # s_fracpeak = (peak_sum/total_weight)
-    # else:
-        # if Parameters['DETECT_POSITIVE']:
-            # X = -np.abs(UpsampledWavePlus)
-        # else:
-            # X = UpsampledWavePlus
-        # s_fracpeak = 1.0*np.argmin(np.amin(X, axis=1))
+    if Parameters['USE_WEIGHTED_MEAN_PEAK_SAMPLE']:
+        peak_sum = 0.0
+        total_weight = 0.0
+        for ch in xrange(WavePlus.shape[1]):
+            X = UpsampledWavePlus[:, ch]
+            if Parameters['DETECT_POSITIVE']:
+                X = -np.abs(X)
+            i_intpeak = np.argmin(X)
+            left, right = i_intpeak-1, i_intpeak+2
+            if right>len(X):
+                left, right = left+len(X)-right, len(X)
+            elif left<0:
+                left, right = 0, right-left
+            a_b_c = abc(np.arange(left, right, dtype=np.float32),
+                        X[left:right])
+            s_fracpeak = max_t(a_b_c)
+            weight = -X[i_intpeak]
+            if weight<0:
+                weight = 0
+            peak_sum += s_fracpeak*weight
+            total_weight += weight
+        s_fracpeak = (peak_sum/total_weight)
+    else:
+        if Parameters['DETECT_POSITIVE']:
+            X = -np.abs(UpsampledWavePlus)
+        else:
+            X = UpsampledWavePlus
+        s_fracpeak = 1.0*np.argmin(np.amin(X, axis=1))
         
-    # # s_fracpeak currently in coords of UpsampledWavePlus
-    # s_fracpeak = s_fracpeak/upsampling_factor
-    # # s_fracpeak now in coordinates of WavePlus
-    # s_fracpeak += SampArrMin
-    # # s_fracpeak now in coordinates of FilteredArr
+    # s_fracpeak currently in coords of UpsampledWavePlus
+    s_fracpeak = s_fracpeak/upsampling_factor
+    # s_fracpeak now in coordinates of WavePlus
+    s_fracpeak += SampArrMin
+    # s_fracpeak now in coordinates of FilteredArr
     
     
     
@@ -212,15 +212,15 @@ def extract_wave_new(IndList, FilteredArr, FilteredHilbertArr, s_before,
     
     
     
-    #################################
-    # New alignment
-    #################################
-    # In the window of the chunk (connected component), we take the clipped Hilbert 
-    # (masks between 0 and 1).
-    comp_clipped = np.clip((comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak), 0, 1)
-    # now we take the weighted average of the sample times in the component
-    s_fracpeak = np.sum(comp_clipped * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_clipped)
-    s_fracpeak += SampArrMin
+    # #################################
+    # # New alignment
+    # #################################
+    # # In the window of the chunk (connected component), we take the clipped Hilbert 
+    # # (masks between 0 and 1).
+    # comp_clipped = np.clip((comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak), 0, 1)
+    # # now we take the weighted average of the sample times in the component
+    # s_fracpeak = np.sum(comp_clipped * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_clipped)
+    # s_fracpeak += SampArrMin
     
     
     #################################
