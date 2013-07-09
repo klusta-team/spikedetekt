@@ -242,8 +242,8 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         first_chunks_std = np.std(FilteredChunk)
         
     # set the high and low thresholds 
-    ThresholdStrong = 25
-    ThresholdWeak = 15
+    ThresholdStrong = Parameters['THRESH_STRONG']
+    ThresholdWeak = Parameters['THRESH_WEAK']
         
     n_samples = num_samples(DatFileNames, n_ch_dat)
     spike_count = 0
