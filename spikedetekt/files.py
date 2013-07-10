@@ -167,6 +167,7 @@ def shank_description(shanksize):
         mask_binary = Int8Col(shape=(shanksize,))
         mask_float = Float32Col(shape=(shanksize,))
         features = Float32Col(shape=(1+fpc*shanksize,))
+        PC_3s = Float32Col(shape=(fpc*shanksize,)) 
     return description
 
 def waveform_description(shanksize):
