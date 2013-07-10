@@ -82,6 +82,10 @@ def spike_detection_job(DatFileNames, ProbeFileName, output_dir, output_name):
         numwarn = GlobalVariables['warnings']
         if numwarn:
             log_message('WARNINGS ENCOUNTERED: '+str(numwarn)+', check log file.')
+    
+        # Close the log file at the end.
+        if 'log_fd' in GlobalVariables:
+            GlobalVariables['log_fd'].close()
     # Print Parameters dictionary to .log file
     #log_message("\n".join(["{0:s} = {1:s}".format(key, str(value)) for key, value in Parameters.iteritems()]))
             
@@ -192,10 +196,6 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
 
     for h5 in h5s.values():
         h5.close()
-    
-    # Close the log file at the end.
-    if 'log_fd' in GlobalVariables:
-        GlobalVariables['log_fd'].close()
                 
 ###########################################################
 ############# Spike extraction helper functions ###########    

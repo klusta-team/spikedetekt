@@ -22,6 +22,8 @@ def compute_pcs(X_ns):
 def reget_features(X_nsc):
     FPC = Parameters['FPC']
     PC_3s = compute_pcs(X_nsc[:,:,0])[:FPC]  # FPC x nchannels 
+    print 'PC_3s', PC_3s.shape
+    print 'X_nsc', X_nsc.shape
     if Parameters['SHOW_PCS']:
         import matplotlib.pyplot as plt
         for i in xrange(FPC):
