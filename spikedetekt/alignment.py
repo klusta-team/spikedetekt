@@ -164,7 +164,10 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start,Thre
             a_b_c = abc(np.arange(left, right, dtype=np.float32),
                         X[left:right])
             s_fracpeak = max_t(a_b_c)
-            weight = -(X[i_intpeak]+Threshold[ch])
+            if Parameters['USE_SINGLE_THRESHOLD']:
+                weight = -(X[i_intpeak]+Threshold)
+            else:
+                weight = -(X[i_intpeak]+Threshold[ch])
             if weight<0:
                 weight = 0
             peak_sum += s_fracpeak*weight
