@@ -3,6 +3,7 @@ This module contains some functions for creating feature vectors.
 """
 import numpy as np
 from parameters import Parameters
+from IPython import embed
 
 def compute_pcs(X_ns):
     """Compute principal components of X_ns
@@ -21,7 +22,7 @@ def compute_pcs(X_ns):
 
 def reget_features(X_nsc):
     FPC = Parameters['FPC']
-    PC_3s = compute_pcs(X_nsc[:,:,0])[:FPC]  # FPC x nchannels 
+    PC_3s = compute_pcs(X_nsc[:,:,0])[:FPC]  # FPC x Parameters['S_TOTAL']
     print 'PC_3s', PC_3s.shape
     print 'X_nsc', X_nsc.shape
     if Parameters['SHOW_PCS']:
@@ -29,6 +30,7 @@ def reget_features(X_nsc):
         for i in xrange(FPC):
             plt.plot(PC_3s[i])
         plt.show()
+     #embed()
     return PC_3s
 
 def project_features(PC_3s, X_sc):

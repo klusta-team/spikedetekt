@@ -24,6 +24,7 @@ from time import sleep
 from subsets import cluster_withsubsets
 from masking import get_float_mask
 from log import log_message, log_warning
+from IPython import embed
 
 def set_globals_samples(sample_rate,high_frequency_factor):
     """
@@ -179,10 +180,11 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
     for shank in probe.shanks_set:
         X = shank_table['waveforms', shank].cols.wave[:Parameters['PCA_MAXWAVES']]
         PC_3s = reget_features(X)
+        #embed()
         for sd_row, w_row in izip(shank_table['spikedetekt', shank],
                                   shank_table['waveforms', shank]):
             f = project_features(PC_3s, w_row['wave'])
-            
+            #embed()
             ### NEW
             # add PCA components
             sd_row['PC_3s'] = PC_3s.flatten()

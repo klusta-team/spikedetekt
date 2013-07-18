@@ -162,12 +162,13 @@ def get_chunk_for_thresholding(fd, n_ch_dat, ChannelsToUse, n_samples):
 def shank_description(shanksize):
     s_total = Parameters['S_TOTAL']
     fpc = Parameters['FPC']
+    s_total = Parameters['S_TOTAL']
     class description(IsDescription):
         time = Int32Col()
         mask_binary = Int8Col(shape=(shanksize,))
         mask_float = Float32Col(shape=(shanksize,))
         features = Float32Col(shape=(1+fpc*shanksize,))
-        PC_3s = Float32Col(shape=(fpc*fpc*shanksize,)) 
+        PC_3s = Float32Col(shape=(fpc*s_total,)) 
     return description
 
 def waveform_description(shanksize):
