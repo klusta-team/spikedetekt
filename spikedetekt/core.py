@@ -184,7 +184,8 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
         for sd_row, w_row in izip(shank_table['spikedetekt', shank],
                                   shank_table['waveforms', shank]):
             f = project_features(PC_3s, w_row['wave'])
-            #embed()
+            # f needs to have shape (n_ch, PCs)
+            embed()
             ### NEW
             # add PCA components
             sd_row['PC_3s'] = PC_3s.flatten()

@@ -40,4 +40,4 @@ def reget_features(X_nsc):
 
 def project_features(PC_3s, X_sc):
    # return 100.*np.dot(PC_3s, X_sc).T
-    return 100.*np.einsum('ijk,jk->ik',PC_3s, X_sc)
+    return 100.*np.einsum('ijk,jk->ik',PC_3s, X_sc).T
