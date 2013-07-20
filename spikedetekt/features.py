@@ -22,9 +22,14 @@ def compute_pcs(X_ns):
 
 def reget_features(X_nsc):
     FPC = Parameters['FPC']
-    PC_3s = compute_pcs(X_nsc[:,:,0])[:FPC]  # FPC x Parameters['S_TOTAL']
+   # PC_3s = compute_pcs(X_nsc[:,:,0])[:FPC]  # FPC x Parameters['S_TOTAL']
+    n_ch = Parameters['N_CH']
+    s_tot = Parameters['S_TOTAL']
+    PC_3s = np.zeros((FPC,s_tot,n_ch))
+    for j in xrange(n_ch):
+        PC_3s[:,:,j] = compute_pcs(X_nsc[:,:,j])[:FPC]  # FPC x Parameters['S_TOTAL'] x Parameters['N_CH']
     print 'PC_3s', PC_3s.shape
-    print 'X_nsc', X_nsc.shape
+    print 'X_nsc', X_nsc.shape # Number of spikes x Number of samples per Spike x Parameters['N_CH']
     if Parameters['SHOW_PCS']:
         import matplotlib.pyplot as plt
         for i in xrange(FPC):
@@ -34,4 +39,5 @@ def reget_features(X_nsc):
     return PC_3s
 
 def project_features(PC_3s, X_sc):
-    return 100.*np.dot(PC_3s, X_sc).T
+   # return 100.*np.dot(PC_3s, X_sc).T
+    return 100.*np.einsum('ijk,jk->ik',PC_3s, X_sc)
