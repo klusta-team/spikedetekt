@@ -75,7 +75,7 @@ def spike_detection_job(DatFileNames, ProbeFileName, output_dir, output_name):
         
         Channels_dat = np.arange(probe.num_channels)
         # Print Parameters dictionary to .log file
-        log_message("\n".join(["{0:s} = {1:s}".format(key, str(value)) for key, value in Parameters.iteritems() if not key.startswith('_')]))
+        log_message("\n".join(["{0:s} = {1:s}".format(key, str(value)) for key, value in sorted(Parameters.iteritems()) if not key.startswith('_')]))
         spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat,
                                       Channels_dat, probe.channel_graph,
                                       probe, max_spikes)
