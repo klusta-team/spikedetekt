@@ -187,6 +187,11 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
 
     for h5 in h5s.values():
         h5.close()
+        # NEW: erase the HDF5 files at the end, because we're using a direct 
+        # conversion tool in KlustaViewa for now.
+        os.remove(h5.filename)
+        
+    
                 
 ###########################################################
 ############# Spike extraction helper functions ###########    
