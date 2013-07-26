@@ -113,10 +113,10 @@ class FilWriter(object):
         if not Parameters['WRITE_FIL_FILE']:
             return
         if s_end>keep_end: #m writing out the high-pass filtered data
-            FilteredChunkInt = FilteredChunk[keep_start-s_start:keep_end-s_end]
+            FilteredChunkInt = FilteredChunk[keep_start-s_start:keep_end-s_end, :]
             FilteredChunkInt = np.int16(FilteredChunkInt)
         else: #m we're in the end
-            FilteredChunkInt = np.int16(FilteredChunk[keep_start-s_start:])
+            FilteredChunkInt = np.int16(FilteredChunk[keep_start-s_start:, :])
         for fd, f_start, f_end in self.objs_and_offsets:
             # find the intersection of [f_start, f_end] and [s_start, s_end]
             i_start = max(f_start, keep_start)
@@ -127,7 +127,7 @@ class FilWriter(object):
                 # samples
                 a_start = i_start-keep_start
                 a_end = i_end-keep_start
-                fd.write(FilteredChunkInt[a_start:a_end])
+                fd.write(FilteredChunkInt[a_start:a_end, :].flatten())
 
 
 def get_chunk_for_thresholding(fd, n_ch_dat, ChannelsToUse, n_samples):
@@ -160,13 +160,15 @@ def get_chunk_for_thresholding(fd, n_ch_dat, ChannelsToUse, n_samples):
 #    return description
 
 def shank_description(shanksize):
-    s_total = Parameters['S_TOTAL']
-    fpc = Parameters['FPC']
+   # s_total = Parameters['S_TOTAL']
+   # fpc = Parameters['FPC']
+    n_ch,  fpc ,s_total  = eval('(N_CH, FPC, S_TOTAL)', Parameters)
     class description(IsDescription):
         time = Int32Col()
         mask_binary = Int8Col(shape=(shanksize,))
         mask_float = Float32Col(shape=(shanksize,))
         features = Float32Col(shape=(1+fpc*shanksize,))
+        PC_3s = Float32Col(shape=(fpc*s_total*n_ch,)) 
     return description
 
 def waveform_description(shanksize):
