@@ -104,15 +104,16 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
     
     # Create HDF5 files
     h5s = {}
+    h5s_filenames = {}
     for n in ['main', 'waves']:
         filename = basename+'.'+n+'.h5'
         h5s[n] = tables.openFile(filename, 'w')
-        h5s[n].filename = filename
+        h5s_filenames[n] = filename
     for n in ['raw', 'high', 'low']:
         if Parameters['RECORD_'+n.upper()]:
             filename = basename+'.'+n+'.h5'
             h5s[n] = tables.openFile(filename, 'w')
-            h5s[n].filename = filename
+            h5s_filenames[n] = filename
     main_h5 = h5s['main']
     # Shanks groups
     shanks_group = {}
@@ -202,12 +203,12 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
             
     klusters_files(h5s, shank_table, basename, probe)
 
-    for h5 in h5s.values():
+    for key, h5 in h5s.iteritems():
         h5.close()
         if not Parameters['KEEP_OLD_HDF5_FILES']:
             # NEW: erase the HDF5 files at the end, because we're using a direct 
             # conversion tool in KlustaViewa for now.
-            os.remove(h5.filename)
+            os.remove(h5s_filenames[key])
         
     
                 
