@@ -105,10 +105,14 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
     # Create HDF5 files
     h5s = {}
     for n in ['main', 'waves']:
-        h5s[n] = tables.openFile(basename+'.'+n+'.h5', 'w')
+        filename = basename+'.'+n+'.h5'
+        h5s[n] = tables.openFile(filename, 'w')
+        h5s[n].filename = filename
     for n in ['raw', 'high', 'low']:
         if Parameters['RECORD_'+n.upper()]:
-            h5s[n] = tables.openFile(basename+'.'+n+'.h5', 'w')
+            filename = basename+'.'+n+'.h5'
+            h5s[n] = tables.openFile(filename, 'w')
+            h5s[n].filename = filename
     main_h5 = h5s['main']
     # Shanks groups
     shanks_group = {}
