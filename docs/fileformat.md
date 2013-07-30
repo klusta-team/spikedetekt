@@ -201,7 +201,7 @@ Example:
 
     {
         "nchannels": 8,
-        "channel_names": {"0":"ch1", "1":"ch2", ...}
+        "channel_names": {"0": "ch1", "1": "LFP", ...}
         "dead_channels": (2, 6)
         "shanks": 
             [
@@ -209,13 +209,13 @@ Example:
                     "index": 0,
                     "channels": [0, 1, 2, 3],
                     "graph": [[0, 1], [2, 3], ...],
-                    "geometry": {"0":"0.123", "1":"0.456", ...}
+                    "geometry": {"0": [0.1, 0.2], "1": [0.3, 0.4], ...}
                 },
                 {
                     "index": 1,
                     "channels": [4, 5, 6, 7],
                     "graph": [[4, 5], [6, 7], ...],
-                    "geometry": {"4":"0.123", "5":"0.456", ...}
+                    "geometry": {"4": [0.1, 0.2], "5": [0.3, 0.4], ...}
                 }
             ]
     }
