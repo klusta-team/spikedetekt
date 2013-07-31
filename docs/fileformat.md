@@ -201,8 +201,8 @@ Example:
 
     {
         "nchannels": 8,
-        "channel_names": {"0": "ch1", "1": "LFP", ...}
-        "dead_channels": (2, 6)
+        "channel_names": {"0": "ch1", "1": "LFP", ...},
+        "dead_channels": [2, 6],
         "shanks": 
             [
                 {
