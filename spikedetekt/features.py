@@ -23,10 +23,11 @@ def compute_pcs(X_ns):
 def reget_features(X_nsc):
     FPC = Parameters['FPC']
    # PC_3s = compute_pcs(X_nsc[:,:,0])[:FPC]  # FPC x Parameters['S_TOTAL']
-    n_ch = Parameters['N_CH']
+   # n_ch = Parameters['N_CH']
+    n_livech = X_nsc.shape[2]
     s_tot = Parameters['S_TOTAL']
-    PC_3s = np.zeros((FPC,s_tot,n_ch))
-    for j in xrange(n_ch):
+    PC_3s = np.zeros((FPC,s_tot,n_livech))
+    for j in xrange(n_livech):
         PC_3s[:,:,j] = compute_pcs(X_nsc[:,:,j])[:FPC]  # FPC x Parameters['S_TOTAL'] x Parameters['N_CH']
     print 'PC_3s', PC_3s.shape
     print 'X_nsc', X_nsc.shape # Number of spikes x Number of samples per Spike x Parameters['N_CH']

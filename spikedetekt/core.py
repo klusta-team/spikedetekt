@@ -162,9 +162,13 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
                                                           ChannelGraph,
                                                           max_spikes,
                                                           ):
-        # what shank are we in?
+        # what shank are we in? 
         nzc, = ChannelMask.nonzero()
-        shank = probe.channel_to_shank[nzc[0]]
+        internzc = list(set(nzc).intersection(probe.channel_to_shank.keys()))
+        if internzc:
+            shank = probe.channel_to_shank[internzc[0]]
+        else:
+            continue
         # write only the channels of this shank
         channel_list = np.array(sorted(list(probe.channel_set[shank])))
         t = shank_table['spikedetekt', shank]
