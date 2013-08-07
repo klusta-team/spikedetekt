@@ -200,9 +200,31 @@ It contains the following information:
 Example:
 
     {
-        "nchannels": 8,
-        "channel_names": {"0": "ch1", "1": "LFP", ...},
-        "dead_channels": [2, 6],
+        "channel_height": "0.25"
+        "lastviewed_x": "0.24"
+        
+        "channels":
+            [
+                {
+                     "0": {"group":"0", "name":"ch0"}
+                     "1": {"group":"0", "name":"ch1", "channel_height": 0.1}
+                     "2": {"group":"0", "name":"LFP", "colour":"12"}
+                     "3": {"group":"-1"}
+                     ...
+                     "7": {"group":"1", "name":"ch7", "ypos", "0.25"}
+                     "8": {"group":"2", "name":"Sync Pulse", "voltage_gain_multiplier": "1.2", "visible":"false"}
+                },
+            ]
+                     
+        "groups":
+            [
+                {
+                     "0": {"name":"Hippocampus", "shank":"0", "colour":"14"}
+                     "1": {"name":"Prefrontal Cortex", "shank":"1", "visible":"False", "colour":"13"}
+                     "2": {"name":"Auxiliary Data", "colour":"2"}
+                },
+            ]
+            
         "shanks": 
             [
                 {
