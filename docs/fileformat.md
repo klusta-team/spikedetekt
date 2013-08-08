@@ -317,7 +317,7 @@ New files:
   * klx (HDF5): main HDF5 file
   * klxw (HDF5): waveforms
   * [raw/low/high].klxd (HDF5): raw or filtered multichannel data + some metadata (sampling frequency, voltage gain, ...)
-  * klxa (JSON text file): most metadata, including probe file, dead channels, channel colors, channel groups, channel names, group names, is visible. Example:
+  * klxa (JSON text file): non-critical metadata, including dead channels, channel colors, channel groups, channel names, group names, is visible. Example:
 
         {
             "channel_height": 0.25,
@@ -346,7 +346,7 @@ New files:
                 ],
         }
         
-  * klxp: new probe file
+  * klxp (JSON): new probe file, can be copied from one experiment to the next as it is specific to a given probe
         
         {
             "shanks": 
