@@ -59,7 +59,7 @@ The HDF5 **KLX** file contains all spiking information.
       * `time`: UInt64, spike time, in number of samples (max ~ 10^19)
       * `features`: Float32(nfet,), a vector with the spike features, typically nfet=nchannels*fetdim+nextrafet, with fetdim the number of principal components per channel
       * `masks`: UInt8(nfet,), a vector with the masks, 0=totally masked, 255=unmasked
-      * `cluster`: `UInt32`, the cluster number (max ~ 10^10)
+      * `cluster`: UInt32, the cluster number (max ~ 10^10)
   
   * `/shanks/shankX/waveforms`: *table*, one row = one spike, and the following columns:
       * `waveform_filtered`: Int16(nsamples*nchannels,), a vector with the high-pass filtered spike waveform. Stride order: sample first, channel second.
@@ -186,7 +186,7 @@ This text file (written in a tiny subset of Python) contains all parameters nece
 Relation with the old file formats
 ----------------------------------
 
-### Where does any old file go?
+### Where do the old files go?
 
   * CLU ==> KLX
   * RES ==> KLX
