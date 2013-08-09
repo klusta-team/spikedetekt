@@ -53,7 +53,7 @@ The HDF5 **KLX** file contains all spiking information.
       * `freq` (double): sampling frequency in Hertz.
       * `probe` (string): description of the probe in JSON (see below).
 
-  * `/shanks/shankX/` (*X* being the shank index, starting from 1): *group* with the spikes detected on that shank.
+  * `/shanks/shankX/` ( *X* being the shank index, starting from 1): *group* with the spikes detected on that shank.
   
   * `/shanks/shankX/spikes`: *table*, one row = one spike, and the following columns:
       * `time`: `UInt64`, spike time, in number of samples (max ~ 10^19)
@@ -62,16 +62,16 @@ The HDF5 **KLX** file contains all spiking information.
       * `cluster`: `UInt32`, the cluster number (max ~ 10^10)
   
   * `/shanks/shankX/waveforms`: *table*, one row = one spike, and the following columns:
-          * `waveform_filtered`: `Int16(nsamples*nchannels,)`, a vector with the high-pass filtered spike waveform. Stride order: sample first, channel second.
-          * `waveform_unfiltered`: `Int16(nsamples*nchannels,)`, a vector with the raw spike waveform.
+      * `waveform_filtered`: `Int16(nsamples*nchannels,)`, a vector with the high-pass filtered spike waveform. Stride order: sample first, channel second.
+      * `waveform_unfiltered`: `Int16(nsamples*nchannels,)`, a vector with the raw spike waveform.
       
   * `/shanks/shankX/clusters`: *table*, one row = one cluster, and the following columns:
-          * `cluster`: `UInt32`, the cluster number
-          * `group`: `UInt8`, the cluster group (max = 255)
+      * `cluster`: `UInt32`, the cluster number
+      * `group`: `UInt8`, the cluster group (max = 255)
   
   * `/shanks/shankX/groups`: *table*, one row = one cluster group, and the following columns:
-          * `group`: `UInt8`, the group number
-          * `name`: `String(64)`, the group name
+      * `group`: `UInt8`, the group number
+      * `name`: `String(64)`, the group name
   
 
 #### KLD
