@@ -56,22 +56,22 @@ The HDF5 **KLX** file contains all spiking information.
   * `/shanks/shankX/` ( *X* being the shank index, starting from 1): *group* with the spikes detected on that shank.
   
   * `/shanks/shankX/spikes`: *table*, one row = one spike, and the following columns:
-      * `time`: `UInt64`, spike time, in number of samples (max ~ 10^19)
-      * `features`: `Float32(nfet,)`, a vector with the spike features, typically `nfet=nchannels*fetdim+nextrafet`, with `fetdim` the number of principal components per channel
-      * `masks`: `UInt8(nfet,)`, a vector with the masks, 0=totally masked, 255=unmasked
+      * `time`: UInt64, spike time, in number of samples (max ~ 10^19)
+      * `features`: Float32(nfet,), a vector with the spike features, typically nfet=nchannels*fetdim+nextrafet, with fetdim the number of principal components per channel
+      * `masks`: UInt8(nfet,), a vector with the masks, 0=totally masked, 255=unmasked
       * `cluster`: `UInt32`, the cluster number (max ~ 10^10)
   
   * `/shanks/shankX/waveforms`: *table*, one row = one spike, and the following columns:
-      * `waveform_filtered`: `Int16(nsamples*nchannels,)`, a vector with the high-pass filtered spike waveform. Stride order: sample first, channel second.
-      * `waveform_unfiltered`: `Int16(nsamples*nchannels,)`, a vector with the raw spike waveform.
+      * `waveform_filtered`: Int16(nsamples*nchannels,), a vector with the high-pass filtered spike waveform. Stride order: sample first, channel second.
+      * `waveform_unfiltered`: Int16(nsamples*nchannels,), a vector with the raw spike waveform.
       
   * `/shanks/shankX/clusters`: *table*, one row = one cluster, and the following columns:
-      * `cluster`: `UInt32`, the cluster number
-      * `group`: `UInt8`, the cluster group (max = 255)
+      * `cluster`: UInt32, the cluster number
+      * `group`: UInt8, the cluster group (max = 255)
   
   * `/shanks/shankX/groups`: *table*, one row = one cluster group, and the following columns:
-      * `group`: `UInt8`, the group number
-      * `name`: `String(64)`, the group name
+      * `group`: UInt8, the group number
+      * `name`: String(64), the group name
   
 
 #### KLD
@@ -79,7 +79,7 @@ The HDF5 **KLX** file contains all spiking information.
 The HDF5 **KLD** files contain all non-spiking (raw or filtered) information.
 
   * `.raw.KLD`:
-      * `/data_raw`: `[EArray](http://pytables.github.io/usersguide/libref/homogenous_storage.html#the-earray-class)(Int16, (duration*freq, nchannels))` with the raw data on all channels
+      * `/data_raw`: [EArray](http://pytables.github.io/usersguide/libref/homogenous_storage.html#the-earray-class)(Int16, (duration*freq, nchannels)) with the raw data on all channels
   
   * `.high.KLD`:
       * `/data_high`: high-pass filered data
