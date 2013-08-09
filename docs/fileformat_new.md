@@ -96,46 +96,40 @@ This JSON text file contains aesthetic information about the channel and cluster
 
     {
         "channel_height": 0.25,
-        "lastviewed_x": 0.24,
+        "lastviewed_x": 123.4,
 
         "channels":
             [
-                {
-                     "0": {"group": "0", "name": "ch0"},
-                     "1": {"group": "0", "name": "ch1", "channel_height": 0.1},
-                     "2": {"group": "0", "name": "LFP", "color": 12},
-                     "3": {"group": "0"},
-                     "4": {"group": "0"},
-                     "5": {"group": "0"},
-                     "6": {"group": "0"},
-                     "7": {"group": 1, "name": "ch7", "ypos", 0.25},
-                     "8": {"group": 2, "name": "Sync Pulse", "voltage_gain_multiplier": 1.2, "visible": false}
-                },
+                 {"channel": 0, "group": 0, "name": "ch0"},
+                 {"channel": 1, "group": 0, "name": "ch1", "channel_height": 0.1},
+                 {"channel": 2, "group": 0, "name": "LFP", "color": 12},
+                 {"channel": 3, "group": 0},
+                 {"channel": 4, "group": 0},
+                 {"channel": 5, "group": 0},
+                 {"channel": 6, "group": 0},
+                 {"channel": 7, "group": 1, "name": "ch7", "ypos", 0.25},
+                 {"channel": 8, "group": 2, "name": "Sync Pulse", "voltage_gain_multiplier": 1.2, "visible": false}
             ],
             
         "clusters":
             [
-                {"0": {"color": 3}},
-                {"1": {"color": 4}},
+                {"cluster": 0, "color": 3},
+                {"cluster": 1, "color": 4},
             ],
 
         "groups_of_channels":
             [
-                {
-                     "0": {"name": "Hippocampus", "color": 14},
-                     "1": {"name": "Prefrontal Cortex", "visible": false, "color": 13},
-                     "2": {"name": "Auxiliary Data", "color": 2}
-                },
+                 {"group": 0, "name": "Hippocampus", "color": 14},
+                 {"group": 1, "name": "Prefrontal Cortex", "visible": false, "color": 13},
+                 {"group": 2, "name": "Auxiliary Data", "color": 2}
             ],
 
         "groups_of_clusters":
             [
-                {
-                     "0": {"color": 1},
-                     "1": {"color": 2},
-                     "2": {"color": 3}
-                     "3": {"color": 4}
-                },
+                 {"group": "0", "color": 1},
+                 {"group": "1", "color": 2},
+                 {"group": "2", "color": 3},
+                 {"group": "3", "color": 4},
             ],
     }
 
@@ -153,13 +147,13 @@ This JSON text file describes the probe used for the experiment: its geometry, i
         "shanks": 
             [
                 {
-                    "index": 0,
+                    "shank_index": 0,
                     "channels": [0, 1, 2, 3],
                     "graph": [[0, 1], [2, 3], ...],
                     "geometry": {"0": [0.1, 0.2], "1": [0.3, 0.4], ...}
                 },
                 {
-                    "index": 1,
+                    "shank_index": 1,
                     "channels": [4, 5, 6, 7],
                     "graph": [[4, 5], [6, 7], ...],
                     "geometry": {"4": [0.1, 0.2], "5": [0.3, 0.4], ...}
