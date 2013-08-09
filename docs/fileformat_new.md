@@ -212,6 +212,37 @@ The **KwikKonvert** tool converts from the old formats to the new ones.
         klustakonvert mydatablah1.ns5 mydatablah2.ns5 [--name mydata] [--probe myprobe.probe] [--x myxml.xml] [--nchannels 32] [--freq 20000] [--nbits 16] [--ignore-channels 1,2,3]
 
 
+### Export
+
+Some programs may need to export the data in old or open formats to simplify subsequent analysis.
+
+
+#### KwikSkope
+
+Automatically save in:
+
+  * .KLA: aesthetic information about channel groups and colors
+  * .PROBE: dead channels
+
+
+#### SpikeDetekt
+
+Automatically save in:
+
+  * .KLX: spikes and trivial clusters (cluster = 2 for all spikes)
+  * .low.KLD, .high.KLD: filtered data
+  * .RES: spike times
+  
+
+#### KlustaViewa
+
+Automatically save in:
+
+  * .KLX: clusters, group of each cluster, group names
+  * .KLA: aesthetic information, cluster colors, group colors
+  * .CLU: clusters, with noisy clusters merged in clusters 0 and 1. WARNING: there shouldn't be good clusters 0 and 1!
+
+
 Workflow
 --------
 
@@ -232,7 +263,7 @@ QUESTIONS
   
   * Information about cluster groups is split between KLX (to which group does each cluster belong) and KLA files (what is the group names and colors)...
   
-  
+  * Why would groups of channels be stored in KLA whereas groups of clusters are stored in KLX?
 
 
 
