@@ -1,8 +1,6 @@
 Klusta-Team file format
 =======================
 
-(we should find a name for this file format)
-
 
 Overview
 --------
@@ -111,12 +109,6 @@ This JSON text file contains aesthetic information about the channel and cluster
                  {"channel": 8, "group": 2, "name": "Sync Pulse", "voltage_gain_multiplier": 1.2, "visible": false}
             ],
             
-        "clusters":
-            [
-                {"cluster": 0, "color": 3},
-                {"cluster": 1, "color": 4},
-            ],
-
         "groups_of_channels":
             [
                  {"group": 0, "name": "Hippocampus", "color": 14},
@@ -124,13 +116,24 @@ This JSON text file contains aesthetic information about the channel and cluster
                  {"group": 2, "name": "Auxiliary Data", "color": 2}
             ],
 
-        "groups_of_clusters":
-            [
-                 {"group": "0", "color": 1},
-                 {"group": "1", "color": 2},
-                 {"group": "2", "color": 3},
-                 {"group": "3", "color": 4},
-            ],
+        "shanks": 
+            {   
+                "shank_index": 1,
+                
+                "clusters":
+                    [
+                        {"cluster": 0, "color": 3},
+                        {"cluster": 1, "color": 4},
+                    ],
+
+                "groups_of_clusters":
+                    [
+                         {"group": "0", "color": 1},
+                         {"group": "1", "color": 2},
+                         {"group": "2", "color": 3},
+                         {"group": "3", "color": 4},
+                    ],
+            }
     }
 
 
@@ -147,13 +150,13 @@ This JSON text file describes the probe used for the experiment: its geometry, i
         "shanks": 
             [
                 {
-                    "shank_index": 0,
+                    "shank_index": 1,
                     "channels": [0, 1, 2, 3],
                     "graph": [[0, 1], [2, 3], ...],
                     "geometry": {"0": [0.1, 0.2], "1": [0.3, 0.4], ...}
                 },
                 {
-                    "shank_index": 1,
+                    "shank_index": 2,
                     "channels": [4, 5, 6, 7],
                     "graph": [[4, 5], [6, 7], ...],
                     "geometry": {"4": [0.1, 0.2], "5": [0.3, 0.4], ...}
@@ -195,6 +198,8 @@ Relation with the old file formats
 
 ### Conversion
 
+#### KwikKonvert
+
 The **KwikKonvert** tool converts from the old formats to the new ones.
 
   * With a PRM file:
@@ -206,6 +211,11 @@ The **KwikKonvert** tool converts from the old formats to the new ones.
     
         # Write a .raw.KLD file.
         kwikkonvert mydatablah1.ns5 mydatablah2.ns5 [--name mydata] [--probe myprobe.probe] [--x myxml.xml] [--nchannels 32] [--freq 20000] [--nbits 16] [--ignore-channels 1,2,3]
+
+
+#### KlustaViewa
+
+In KlustaViewa, the user can select a set of files in the old format: in this case, they will be converted into the new file format. The old .probe file is then mandatory for the creation of the HDF5 file.
 
 
 ### Export
@@ -229,7 +239,7 @@ Automatically save in:
   * .low.KLD, .high.KLD: filtered data
   * .RES: spike times
 
-  
+
 #### KlustaKwik
 
   * .KLX: load spikes, save cluster_auto
@@ -265,11 +275,11 @@ Priority: from very low (---) to very high (+++).
 
 ### [C] KlustaViewa
   
-  * (+++) Implement load/save features in KLX, KLA
-  * (+++) Implement version in the file format
+  * [DONE] (+++) Implement load/save features in KLX, KLA
+  * [DONE] (+++) Implement version in the file format
+  * (+++) Implement automatic save in CLU
   * (+++) Release KlustaViewa 0.2.0 and test it.
-  * (++) Implement export in CLU, FET
-  
+
 
 ### [C/M] KwikKonvert
 
@@ -278,9 +288,9 @@ Priority: from very low (---) to very high (+++).
   * (++) Implement .raw.KLD writing
   * (+) Implement a basic command-line interface
   * (+) Move all shared code in KlustaLib.
-  
 
-### [M] KwikSkope
+
+### [C/M] KwikSkope
 
   * (+) Implement a standalone GUI that can load a KLD file.
   * (-) Implement "mark as bad channels"
