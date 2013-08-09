@@ -26,7 +26,7 @@ File format specification
       
   * Non-scientific **visualization-related metadata** is stored in the **KLA** file (a JSON text-based file).
       
-  * All files contain a **version number**, which is an integer starting at 1.
+  * All files contain a **version number** in `/` (VERSION attribute), which is an integer starting at 1.
 
   * The input files the user provides to the programs to generate these data are:
   
@@ -256,6 +256,39 @@ The idea is that the PARAMS file contains all information required for the progr
   * Step 6: run KlustaViewa.
 
 
+Things to do before August 16th
+-------------------------------
+
+Priority: from very low (---) to very high (+++).
+
+
+### [C] KlustaViewa
+  
+  * (+++) Implement load/save features in KLX, KLA
+  * (+++) Implement version in the file format
+  * (+++) Release KlustaViewa 0.2.0 and test it.
+  * (++) Implement export in CLU, FET
+  
+
+### [C/M] KwikKonvert
+
+  * (++) Implement "load PARAMS"
+  * (++) Implement NS5 and DAT loading with memory mapping
+  * (++) Implement .raw.KLD writing
+  * (+) Implement a basic command-line interface
+  * (+) Move all shared code in KlustaLib.
+  
+
+### [M] KwikSkope
+
+  * (+) Implement a standalone GUI that can load a KLD file.
+  * (-) Implement "mark as bad channels"
+  * (-) Implement "change the channel colors"
+  * (--) Implement channel groups (list of groups, move channels between groups, change group color)
+  * (---) Implement "change channel position"
+  * (--) Fix the coordinate jitter problem
+
+
 QUESTIONS
 ---------
 
@@ -265,6 +298,7 @@ QUESTIONS
   
   * Why would groups of channels be stored in KLA whereas groups of clusters are stored in KLX?
 
+  * Apart from NS5 and DAT, which other formats should we support?
 
 
 
