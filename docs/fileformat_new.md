@@ -1,5 +1,5 @@
-Kwik file format
-================
+Klusta-Team file format
+=======================
 
 (we should find a name for this file format)
 
@@ -31,7 +31,7 @@ File format specification
   * The input files the user provides to the programs to generate these data are:
   
       * the **raw data** coming out from the acquisition system, in any proprietary format (NS5, etc.)
-      * processing parameters and scientific metadata (description of the probe, etc.)
+      * processing parameters (PRM file) and description of the probe (PRB file)
   
   
 ### Software-generated files
@@ -50,8 +50,8 @@ We detail here in detail the internal structure of the files.
 The HDF5 **KLX** file contains all spiking information.
  
   * `/metadata`: *group* with:
-      * `freq` (double): sampling frequency in Hertz.
-      * `probe` (string): description of the probe in JSON (see below).
+      * `PRB_JSON` (string): the PRB file in JSON
+      * `PRM_JSON` (string): the PRM file in JSON
 
   * `/shanks/shankX/` ( *X* being the shank index, starting from 1): *group* with the spikes detected on that shank.
   
@@ -59,7 +59,8 @@ The HDF5 **KLX** file contains all spiking information.
       * `time`: UInt64, spike time, in number of samples (max ~ 10^19)
       * `features`: Float32(nfet,), a vector with the spike features, typically nfet=nchannels*fetdim+nextrafet, with fetdim the number of principal components per channel
       * `masks`: UInt8(nfet,), a vector with the masks, 0=totally masked, 255=unmasked
-      * `cluster`: UInt32, the cluster number (max ~ 10^10)
+      * `cluster_auto`: UInt32, the cluster number (max ~ 10^10), obtained after the automatic clustering stage
+      * `cluster_manual`: UInt32, the cluster number (max ~ 10^10), obtained after the manual stage
   
   * `/shanks/shankX/waveforms`: *table*, one row = one spike, and the following columns:
       * `waveform_filtered`: Int16(nsamples*nchannels,), a vector with the high-pass filtered spike waveform. Stride order: sample first, channel second.
@@ -70,7 +71,7 @@ The HDF5 **KLX** file contains all spiking information.
       * `group`: UInt8, the cluster group (max = 255)
   
   * `/shanks/shankX/groups`: *table*, one row = one cluster group, and the following columns:
-      * `group`: UInt8, the group number
+      * `group`: UInt8, the group number (convention in KlustaViewa: 0=Noise, 1=MUA, 2=Good, 3=Unsorted)
       * `name`: String(64), the group name
   
 
@@ -79,6 +80,7 @@ The HDF5 **KLX** file contains all spiking information.
 The HDF5 **KLD** files contain all non-spiking (raw or filtered) information.
 
   * `.raw.KLD`:
+      * `/metadata`: a *group*, duplicate from KLX. Since the KLX is always created after the KLD, and the dead channels should only be specified at the level of the KLD file (KwikSkope), we will always have the same information in the two files.
       * `/data_raw`: [EArray](http://pytables.github.io/usersguide/libref/homogenous_storage.html#the-earray-class)(Int16, (duration*freq, nchannels)) with the raw data on all channels
   
   * `.high.KLD`:
@@ -129,10 +131,10 @@ This JSON text file contains aesthetic information about the channel and cluster
         "groups_of_clusters":
             [
                 {
-                     "0": {"name": "Noise", "color": 1},
-                     "1": {"name": "MUA", "visible": false, "color": 2},
-                     "2": {"name": "Good", "color": 3}
-                     "3": {"name": "Unsorted", "color": 4}
+                     "0": {"color": 1},
+                     "1": {"color": 2},
+                     "2": {"color": 3}
+                     "3": {"color": 4}
                 },
             ],
     }
@@ -143,12 +145,11 @@ This JSON text file contains aesthetic information about the channel and cluster
 
 These files are provided by the user to the programs, which uses them to process it, and optionally integrate them in the program-generated files.
 
-#### PROBE
+#### PRB
 
 This JSON text file describes the probe used for the experiment: its geometry, its topology, and the dead channels.
 
     {
-        "dead_channels": [2, 5],
         "shanks": 
             [
                 {
@@ -167,14 +168,15 @@ This JSON text file describes the probe used for the experiment: its geometry, i
     }
 
 
-#### PARAMS
+#### PRM
 
 This text file (written in a tiny subset of Python) contains all parameters necessary for the programs to process, open and display the data. Each line is either a comment (starting with #) or a `VARNAME = VALUE` where VARNAME is the variable name, and VALUE is either a number, a string (within quotes), or a list of those. This structure ensures that it's easy to read/write this file programmatically.
 
     EXPERIMENT_NAME = 'myexperiment'
     INPUT_FILES = ['n6mab041109blahblah1.ns5', 'n6mab041109blahblah2.ns5']
-    PROBE_FILE = 'buzsaki32.probe'
+    PRB_FILE = 'buzsaki32.probe'
     SAMPLING_FREQUENCY = 20000.
+    DEAD_CHANNELS = [2, 5]
     NBITS = 16
     VOLTAGE_GAIN = 10.
     # ...
@@ -201,15 +203,15 @@ Relation with the old file formats
 
 The **KwikKonvert** tool converts from the old formats to the new ones.
 
-  * With a PARAMS file:
+  * With a PRM file:
 
         # Write a .raw.KLD file.
-        klustakonvert myexperiment.PARAMS
+        kwikkonvert myexperiment.PRM
     
-  * With command-line arguments:
+  * With command-line arguments (low priority):
     
         # Write a .raw.KLD file.
-        klustakonvert mydatablah1.ns5 mydatablah2.ns5 [--name mydata] [--probe myprobe.probe] [--x myxml.xml] [--nchannels 32] [--freq 20000] [--nbits 16] [--ignore-channels 1,2,3]
+        kwikkonvert mydatablah1.ns5 mydatablah2.ns5 [--name mydata] [--probe myprobe.probe] [--x myxml.xml] [--nchannels 32] [--freq 20000] [--nbits 16] [--ignore-channels 1,2,3]
 
 
 ### Export
@@ -232,7 +234,12 @@ Automatically save in:
   * .KLX: spikes and trivial clusters (cluster = 2 for all spikes)
   * .low.KLD, .high.KLD: filtered data
   * .RES: spike times
+
   
+#### KlustaKwik
+
+  * .KLX: load spikes, save cluster_auto
+
 
 #### KlustaViewa
 
@@ -246,12 +253,12 @@ Automatically save in:
 Workflow
 --------
 
-The idea is that the PARAMS file contains all information required for the programs to run correctly.
+The idea is that the PRM file contains all information required for the programs to run correctly.
 
-  * Step 1: create a PARAMS text file, with the input files (in NS5 or anything), the probe files, various parameters...
+  * Step 1: create a PRM text file, with the input files (in NS5 or anything), the probe files, various parameters...
   * Step 2: run KwikKonvert to create a .KLD file.
-  * Step 3: run KwikSkope to view the raw data, and tag bad channels. The program requires the PARAMS file to know where to save the dead channels (in the PROBE file specified in the PARAMS file).
-  * Step 4: run SpikeDetekt (using the PARAMS file, linking to the PROBE file and the KLD files).
+  * Step 3: run KwikSkope to view the raw data, and tag bad channels. The program requires the PRM file to know where to save the dead channels (in the PROBE file specified in the PRM file).
+  * Step 4: run SpikeDetekt (using the PRM file, linking to the PROBE file and the KLD files).
   * Step 5: run KlustaKwik.
   * Step 6: run KlustaViewa.
 
@@ -272,7 +279,7 @@ Priority: from very low (---) to very high (+++).
 
 ### [C/M] KwikKonvert
 
-  * (++) Implement "load PARAMS"
+  * (++) Implement "load PRM"
   * (++) Implement NS5 and DAT loading with memory mapping
   * (++) Implement .raw.KLD writing
   * (+) Implement a basic command-line interface
@@ -287,19 +294,6 @@ Priority: from very low (---) to very high (+++).
   * (--) Implement channel groups (list of groups, move channels between groups, change group color)
   * (---) Implement "change channel position"
   * (--) Fix the coordinate jitter problem
-
-
-QUESTIONS
----------
-
-  * Should the .KLD files contain metadata about: sampling frequency, voltage gain, ded channels, probe, etc.? If not, one can only read them if the multi-GB .KLX file is there...
-  
-  * Information about cluster groups is split between KLX (to which group does each cluster belong) and KLA files (what is the group names and colors)...
-  
-  * Why would groups of channels be stored in KLA whereas groups of clusters are stored in KLX?
-
-  * Apart from NS5 and DAT, which other formats should we support?
-
 
 
 
