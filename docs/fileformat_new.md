@@ -70,7 +70,7 @@ The HDF5 **KLX** file contains all spiking information.
       * `cluster`: UInt32, the cluster number
       * `group`: UInt8, the cluster group (max = 255)
   
-  * `/shanks/shankX/groups`: *table*, one row = one cluster group, and the following columns:
+  * `/shanks/shankX/groups_of_clusters`: *table*, one row = one cluster group, and the following columns:
       * `group`: UInt8, the group number (convention in KlustaViewa: 0=Noise, 1=MUA, 2=Good, 3=Unsorted)
       * `name`: String(64), the group name
   
