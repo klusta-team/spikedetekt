@@ -277,7 +277,7 @@ Priority: from very low (---) to very high (+++).
   
   * [DONE] Implement load/save features in KLX, KLA
   * [DONE] Implement version in the file format
-  * (+++) Implement automatic save in CLU
+  * [DONE] Implement automatic save in CLU
   * (+++) Release KlustaViewa 0.2.0 and test it.
   * (-) Command-line utility `kwikcheck` to visualize what is in KLX file.
   * (---) Move geometry position save in KLA file instead of SETTINGS.
