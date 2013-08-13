@@ -272,39 +272,4 @@ The idea is that the PRM file contains all information required for the programs
   * Step 6: run KlustaViewa.
 
 
-Things to do before August 16th
--------------------------------
-
-Priority: from very low (---) to very high (+++).
-
-
-### [C] KlustaViewa
-  
-  * [DONE] Implement load/save features in KLX, KLA
-  * [DONE] Implement version in the file format
-  * [DONE] Implement automatic save in CLU
-  * (+++) Release KlustaViewa 0.2.0 and test it.
-  * (-) Command-line utility `kwikcheck` to visualize what is in KLX file.
-  * (---) Move geometry position save in KLA file instead of SETTINGS.
-
-
-### [C/M] KwikKonvert
-
-  * (++) Implement "load PRM"
-  * (++) Implement NS5 and DAT loading with memory mapping
-  * (++) Implement .raw.KLD writing
-  * (+) Implement a basic command-line interface
-  * (+) Move all shared code in KlustaLib.
-
-
-### [C/M] KwikSkope
-
-  * (+) Implement a standalone GUI that can load a KLD file.
-  * (-) Implement "mark as bad channels"
-  * (-) Implement "change the channel colors"
-  * (--) Implement channel groups (list of groups, move channels between groups, change group color)
-  * (---) Implement "change channel position"
-  * (--) Fix the coordinate jitter problem
-
-
 
