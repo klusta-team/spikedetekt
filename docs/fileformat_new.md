@@ -50,6 +50,7 @@ The HDF5 **KLX** file contains all spiking information.
   * `/metadata`: *group* with:
       * `PRB_JSON` (string): the PRB file in JSON
       * `PRM_JSON` (string): the PRM file in JSON
+      * `SHANKS` (array of integers): the list of shanks in the file
 
   * `/shanks/shankX/` ( *X* being the shank index, starting from 1): *group* with the spikes detected on that shank.
   
@@ -169,6 +170,8 @@ This JSON text file describes the probe used for the experiment: its geometry, i
 
 This text file (written in a tiny subset of Python) contains all parameters necessary for the programs to process, open and display the data. Each line is either a comment (starting with #) or a `VARNAME = VALUE` where VARNAME is the variable name, and VALUE is either a number, a string (within quotes), or a list of those. This structure ensures that it's easy to read/write this file programmatically.
 
+This file is converted into JSON before being saved within the KLX file.
+
     EXPERIMENT_NAME = 'myexperiment'
     INPUT_FILES = ['n6mab041109blahblah1.ns5', 'n6mab041109blahblah2.ns5']
     PRB_FILE = 'buzsaki32.probe'
@@ -176,6 +179,8 @@ This text file (written in a tiny subset of Python) contains all parameters nece
     DEAD_CHANNELS = [2, 5]
     NBITS = 16
     VOLTAGE_GAIN = 10.
+    WAVEFORMS_NSAMPLES = 32  # or a dictionary {shank: nsamples}
+    FETDIM = 3  # or a dictionary {shank: fetdim}
     # ...
     
     # SpikeDetekt parameters file
