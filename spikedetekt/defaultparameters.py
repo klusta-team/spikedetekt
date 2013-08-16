@@ -33,6 +33,7 @@ F_LOW = 500. # low pass frequency (Hz)
 F_HIGH_FACTOR = 0.95 # high pass frequency as a proportion of the Nyquist freq, used to derive F_HIGH, i.e. F_HIGH = 0.95*SAMPLERATE/2 here
 BUTTER_ORDER = 3 # Order of butterworth filter
 WRITE_FIL_FILE = True # write filtered output to .fil file
+WRITE_BINFIL_FILE = True # write filtered output to .fil file
 
 # Options for spike detection
 T_BEFORE = .0005 # time before peak in extracted spike
@@ -67,4 +68,6 @@ MAX_SPIKES = None # None for all spikes, or an int
 DO_GLOBAL_CLUSTERING = False
 SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
 KEEP_OLD_HDF5_FILES = False
+DEBUG = False
+
 

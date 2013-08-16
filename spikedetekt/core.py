@@ -25,6 +25,8 @@ from subsets import cluster_withsubsets
 from masking import get_float_mask
 from log import log_message, log_warning
 from IPython import embed
+import debug
+from debug import plot_diagnostics # for debugging with Parameters['DEBUG'] 
 
 def set_globals_samples(sample_rate,high_frequency_factor):
     """
@@ -71,7 +73,10 @@ def spike_detection_job(DatFileNames, ProbeFileName, output_dir, output_name):
     OutDir = output_dir
     with indir(OutDir):    
         # Create a log file
-        GlobalVariables['log_fd'] = open(basename+'.log', 'w')    
+        GlobalVariables['log_fd'] = open(basename+'.log', 'w') 
+        
+        if Parameters['DEBUG']:
+            GlobalVariables['debug_fd'] = open(basename+'.debug', 'w')  
         
         Channels_dat = np.arange(probe.num_channels)
         # Print Parameters dictionary to .log file
@@ -261,6 +266,9 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         else:
             ThresholdSDFactor = np.median(np.abs(FilteredChunk), axis=0)/.6745
         Threshold = ThresholdSDFactor*THRESH_SD
+
+        print 'Threshold = ', Threshold, '\n' 
+        Parameters['THRESHOLD'] = Threshold #Record the absolute Threshold used
     
     n_samples = num_samples(DatFileNames, n_ch_dat)
     
@@ -271,6 +279,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         FilteredChunk = apply_filtering(filter_params, DatChunk)
         
         # write filtered output to file
+        #if Parameters['WRITE_FIL_FILE']:
         fil_writer.write(FilteredChunk, s_start, s_end, keep_start, keep_end)
 
         ############## THRESHOLDING #####################################
@@ -279,10 +288,17 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         else:
             BinaryChunk = (FilteredChunk<-Threshold)
         BinaryChunk = BinaryChunk.astype(np.int8)
+        # write binary chunk filtered output to file
+        if Parameters['WRITE_BINFIL_FILE']:
+            fil_writer.write_bin(BinaryChunk, s_start, s_end, keep_start, keep_end)
         ############### FLOOD FILL  ######################################
         ChannelGraphToUse = complete_if_none(ChannelGraph, N_CH)
         IndListsChunk = connected_components(BinaryChunk,
                             ChannelGraphToUse, S_JOIN_CC)
+        if Parameters['DEBUG']:
+            plot_diagnostics(s_start,IndListsChunk,BinaryChunk,DatChunk,FilteredChunk,Threshold)
+            fil_writer.write_bin(BinaryChunk, s_start, s_end, keep_start, keep_end)
+
         ############## ALIGN AND INTERPOLATE WAVES #######################
         nextbits = []
         for IndList in IndListsChunk:

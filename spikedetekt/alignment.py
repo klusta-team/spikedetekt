@@ -135,6 +135,7 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start,Thre
     # 1. upsample channels we're using on thresholded range
     # 2. find weighted mean peak sample
     SampArrMin, SampArrMax = np.amin(SampArr)-3, np.amax(SampArr)+4
+    #print ' SampArrMin = ', SampArrMin,' SampArrMax = ', SampArrMax, '\n'
     WavePlus = get_padded(FilteredArr, SampArrMin, SampArrMax)
     WavePlus = WavePlus[:, ChMask]
     # upsample WavePlus
