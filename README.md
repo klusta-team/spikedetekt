@@ -184,3 +184,10 @@ In addition, the following file will also be output:
   .main.h5,
   .raw.h5. (See spikdetekt/docs/fileformat.md for more details).
 
+6) How to cite
+--------------
+
+If you have used KlustaKwik and/or SpikeDetekt for a scientific publication, please cite our preprint on the arxiv,
+'High-dimensional cluster analysis with the Masked EM Algorithm' by Shabnam N. Kadir, Dan F.M. Goodman and Kenneth D. Harris:
+
+http://arxiv.org/abs/1309.2848
