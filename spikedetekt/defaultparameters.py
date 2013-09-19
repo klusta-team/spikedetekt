@@ -31,6 +31,7 @@ THRESH_STRONG = 28
 RECORD_RAW = True      # raw data
 RECORD_HIGH = True     # high pass filtered data
 RECORD_LOW = True      # low pass filtered data
+KEEP_OLD_HDF5_FILES = True
 
 # Options for filtering
 F_LOW = 500. # low pass frequency (Hz)
@@ -73,4 +74,5 @@ DO_GLOBAL_CLUSTERING = False
 SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
 DEBUG = False  #Use debug module
 USE_HILBERT = False   #Use Hilbert transform
+
 

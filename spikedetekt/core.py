@@ -305,6 +305,12 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             # write filtered output to file
             #if Parameters['WRITE_FIL_FILE']:
             fil_writer.write(FilteredChunk, s_start, s_end, keep_start, keep_end)
+            if Parameters['DETECT_POSITIVE']:
+                BinaryChunk = np.abs(FilteredChunk)>Threshold
+            else:
+                BinaryChunk = (FilteredChunk<-Threshold)
+            BinaryChunk = BinaryChunk.astype(np.int8)
+        #    print 'I am here at line 313'
 
         ############### FLOOD FILL  ######################################
         ChannelGraphToUse = complete_if_none(ChannelGraph, N_CH)
