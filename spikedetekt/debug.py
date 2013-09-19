@@ -6,7 +6,7 @@ from parameters import Parameters, GlobalVariables
 from IPython import embed # For manual debugging
 
 #  multdetection_times_ms = [5, 52, 119, 204, 208, 232, 241, 251,28695,28742,28831,28855,66906,167264,214241,334526,402506,402508]
-multdetection_times_ms = [2, 1000]
+multdetection_times_ms = Parameters['OBSERVATION_TIMES']
 
 
 def plot_diagnostics(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,threshold):

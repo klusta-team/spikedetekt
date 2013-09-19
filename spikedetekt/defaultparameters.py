@@ -74,5 +74,5 @@ DO_GLOBAL_CLUSTERING = False
 SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
 DEBUG = False  #Use debug module
 USE_HILBERT = False   #Use Hilbert transform
-
+#OBSERVATION_TIMES = None #Observation times in ms for DEBUG option, e.g. [4630,4640]
 
