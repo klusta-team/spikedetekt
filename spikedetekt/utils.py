@@ -18,7 +18,10 @@ def get_padded(Arr, Start, End):
     Assumes that EITHER Start<0 OR End>len(Arr) but not both (raises error).
     '''
     if Start < 0 and End >= Arr.shape[0]:
-        raise IndexError("Can have Start<0 OR End>len(Arr) but not both.")
+        raise IndexError("Can have Start<0 OR End>len(Arr) but not both.\n \
+                           This error has probably occured because your Thresholds \n \
+                             are aritificially low due to early artifacts\n \
+                             Increase the parameter CHUNKS_FOR_THRESH ")
     if Start < 0:
         StartZeros = np.zeros((-Start, Arr.shape[1]), dtype=Arr.dtype)
         return np.vstack((StartZeros, Arr[:End]))

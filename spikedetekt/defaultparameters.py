@@ -23,7 +23,8 @@ CHUNKS_FOR_THRESH = 5 # number of chunks used to determine threshold for detecti
 THRESH_SD = 4.5 # threshold for detection. standard deviations of signal
 DETECT_POSITIVE = False # detect spikes with positive threshold crossing
 
-THRESH_WEAK = 18
+#For use with the Hilbert transform
+THRESH_WEAK = 18 # These are currently set at empirically found values. How about make this dependent on SD?
 THRESH_STRONG = 28
 
 # Recording data in HDF5 file
@@ -36,6 +37,7 @@ F_LOW = 500. # low pass frequency (Hz)
 F_HIGH_FACTOR = 0.95 # high pass frequency as a proportion of the Nyquist freq, used to derive F_HIGH, i.e. F_HIGH = 0.95*SAMPLERATE/2 here
 BUTTER_ORDER = 3 # Order of butterworth filter
 WRITE_FIL_FILE = True # write filtered output to .fil file
+WRITE_BINFIL_FILE = True # write binary filtered output to .bin.fil file
 
 # Options for spike detection
 T_BEFORE = .0008 # time before peak in extracted spike
@@ -69,3 +71,6 @@ MAX_SPIKES = None # None for all spikes, or an int
 # Experimental options
 DO_GLOBAL_CLUSTERING = False
 SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
+DEBUG = False  #Use debug module
+USE_HILBERT = False   #Use Hilbert transform
+

@@ -26,7 +26,7 @@ def extract_wave(IndList, FilteredArr, FilteredHilbertArr, s_before, s_after, n_
     s_before, s_after
         The number of samples to return before and after the peak
         
-    Returns a tuple (Wave, PeakSample, ST):
+    Returns a tuple (Wave, PeakSample, ChMask):
     
     Wave
         The wave aligned around the peak (with interpolation to give subsample
@@ -110,7 +110,109 @@ def interp_around_peak(X_sc, i_intpeak, c_peak, s_before, s_after):
     s_fracpeak = max_t(a_b_c)
     return interp_around(X_sc, s_fracpeak, s_before, s_after)
 
-def extract_wave_new(IndList, FilteredArr, FilteredHilbertArr, s_before, 
+def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start,Threshold):
+    IndArr = np.array(IndList, dtype=np.int32)
+    SampArr = IndArr[:, 0]
+    ChArr = IndArr[:, 1]
+    n_ch = FilteredArr.shape[1]
+    log_fd = GlobalVariables['log_fd']
+    if np.amax(SampArr)-np.amin(SampArr)>Parameters['CHUNK_OVERLAP']/2:
+        s = '''
+        ************ ERROR **********************************************
+        Connected component found with width larger than CHUNK_OVERLAP/2.
+        Spikes could be repeatedly detected, increase the size of
+        CHUNK_OVERLAP and re-run.
+        Component sample range: {sample_range}
+        *****************************************************************
+        '''.format(sample_range=(s_start+np.amin(SampArr),
+                                 s_start+np.amax(SampArr)))
+        log_warning(s, multiline=True)
+        #exit()
+
+    bc = np.bincount(ChArr)
+    # convert to bool and force it to have the right type
+    ChMask = np.zeros(n_ch, dtype=np.bool8)
+    ChMask[:len(bc)] = bc.astype(np.bool8)
+    
+    # Find peak sample:
+    # 1. upsample channels we're using on thresholded range
+    # 2. find weighted mean peak sample
+    SampArrMin, SampArrMax = np.amin(SampArr)-3, np.amax(SampArr)+4
+    #print ' SampArrMin = ', SampArrMin,' SampArrMax = ', SampArrMax, '\n'
+    WavePlus = get_padded(FilteredArr, SampArrMin, SampArrMax)
+    WavePlus = WavePlus[:, ChMask]
+    # upsample WavePlus
+    upsampling_factor = Parameters['UPSAMPLING_FACTOR']
+    if upsampling_factor>1:
+        old_s = np.arange(WavePlus.shape[0])
+        new_s_i = np.arange((WavePlus.shape[0]-1)*upsampling_factor+1)
+        new_s = np.array(new_s_i*(1.0/upsampling_factor), dtype=np.float32)
+        f = interp1d(old_s, WavePlus, bounds_error=True, kind='cubic', axis=0)
+        UpsampledWavePlus = f(new_s)
+    else:
+        UpsampledWavePlus = WavePlus
+    # find weighted mean peak for each channel above threshold
+    if Parameters['USE_WEIGHTED_MEAN_PEAK_SAMPLE']:
+        peak_sum = 0.0
+        total_weight = 0.0
+        for ch in xrange(WavePlus.shape[1]):
+            X = UpsampledWavePlus[:, ch]
+            if Parameters['DETECT_POSITIVE']:
+                X = -np.abs(X)
+            i_intpeak = np.argmin(X)
+            left, right = i_intpeak-1, i_intpeak+2
+            if right>len(X):
+                left, right = left+len(X)-right, len(X)
+            elif left<0:
+                left, right = 0, right-left
+            a_b_c = abc(np.arange(left, right, dtype=np.float32),
+                        X[left:right])
+            s_fracpeak = max_t(a_b_c)
+            if Parameters['USE_SINGLE_THRESHOLD']:
+                weight = -(X[i_intpeak]+Threshold)
+            else:
+                weight = -(X[i_intpeak]+Threshold[ch])
+            if weight<0:
+                weight = 0
+            peak_sum += s_fracpeak*weight
+            total_weight += weight
+        s_fracpeak = (peak_sum/total_weight)
+    else:
+        if Parameters['DETECT_POSITIVE']:
+            X = -np.abs(UpsampledWavePlus)
+        else:
+            X = UpsampledWavePlus
+        s_fracpeak = 1.0*np.argmin(np.amin(X, axis=1))
+    # s_fracpeak currently in coords of UpsampledWavePlus
+    s_fracpeak = s_fracpeak/upsampling_factor
+    # s_fracpeak now in coordinates of WavePlus
+    s_fracpeak += SampArrMin
+    # s_fracpeak now in coordinates of FilteredArr
+    
+    # get block of given size around peaksample
+    try:
+        s_peak = int(s_fracpeak)
+    except ValueError:
+        # This is a bit of a hack. Essentially, the problem here is that
+        # s_fracpeak is a nan because the interpolation didn't work, and
+        # therefore we want to skip the spike. There's already code in
+        # core.extract_spikes that does this if a LinAlgError is raised,
+        # so we just use that to skip this spike (and write a message to the
+        # log).
+        raise np.linalg.LinAlgError 
+    WaveBlock = get_padded(FilteredArr,
+                           s_peak-s_before-1, s_peak+s_after+2)
+    
+    # Perform interpolation around the fractional peak
+    old_s = np.arange(s_peak-s_before-1, s_peak+s_after+2)
+    new_s = np.arange(s_peak-s_before, s_peak+s_after)+(s_fracpeak-s_peak)
+    f = interp1d(old_s, WaveBlock, bounds_error=True, kind='cubic', axis=0)
+    Wave = f(new_s)
+    
+    return Wave, s_peak, ChMask
+
+
+def extract_wave_hilbert_new(IndList, FilteredArr, FilteredHilbertArr, s_before, 
                      s_after, n_ch, s_start, ThresholdStrong, ThresholdWeak):
     IndArr = np.array(IndList, dtype=np.int32)
     SampArr = IndArr[:, 0]
@@ -221,6 +323,151 @@ def extract_wave_new(IndList, FilteredArr, FilteredHilbertArr, s_before,
     # now we take the weighted average of the sample times in the component
     s_fracpeak = np.sum(comp_clipped * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_clipped)
     s_fracpeak += SampArrMin
+    
+    
+    #################################
+    # Realign spike with respect to s_fracpeak
+    #################################
+    # get block of given size around peaksample
+    try:
+        s_peak = int(s_fracpeak)
+    except ValueError:
+        # This is a bit of a hack. Essentially, the problem here is that
+        # s_fracpeak is a nan because the interpolation didn't work, and
+        # therefore we want to skip the spike. There's already code in
+        # core.extract_spikes that does this if a LinAlgError is raised,
+        # so we just use that to skip this spike (and write a message to the
+        # log).
+        raise np.linalg.LinAlgError 
+    WaveBlock = get_padded(FilteredArr,
+                           s_peak-s_before-1, s_peak+s_after+2)
+    # Perform interpolation around the fractional peak
+    old_s = np.arange(s_peak-s_before-1, s_peak+s_after+2)
+    new_s = np.arange(s_peak-s_before, s_peak+s_after)+(s_fracpeak-s_peak)
+    try:
+        f = interp1d(old_s, WaveBlock, bounds_error=True, kind='cubic', axis=0)
+    except ValueError: 
+        #  File "/usr/lib/python2.7/dist-packages/scipy/interpolate/interpolate.py", line 509, in _dot0
+        #  return dot(a, b)
+        #ValueError: matrices are not aligned
+        raise InterpolationError
+    Wave = f(new_s)
+    
+    
+    
+    return Wave, s_peak, ChMask, FloatChMask
+
+def extract_wave_hilbert_old(IndList, FilteredArr, FilteredHilbertArr, s_before, 
+                     s_after, n_ch, s_start, ThresholdStrong, ThresholdWeak):
+    IndArr = np.array(IndList, dtype=np.int32)
+    SampArr = IndArr[:, 0]
+    ChArr = IndArr[:, 1]
+    n_ch = FilteredArr.shape[1]
+    log_fd = GlobalVariables['log_fd']
+    if np.amax(SampArr)-np.amin(SampArr)>Parameters['CHUNK_OVERLAP']/2:
+        s = '''
+        ************ ERROR **********************************************
+        Connected component found with width larger than CHUNK_OVERLAP/2.
+        Spikes could be repeatedly detected, increase the size of
+        CHUNK_OVERLAP and re-run.
+        Component sample range: {sample_range}
+        *****************************************************************
+        '''.format(sample_range=(s_start+np.amin(SampArr),
+                                 s_start+np.amax(SampArr)))
+        log_warning(s, multiline=True)
+        #exit()
+
+    bc = np.bincount(ChArr)
+    # convert to bool and force it to have the right type
+    ChMask = np.zeros(n_ch, dtype=np.bool8)
+    ChMask[:len(bc)] = bc.astype(np.bool8)
+    n_unmasked_ch = np.sum(ChMask)
+    
+    # Find peak sample:
+    # 1. upsample channels we're using on thresholded range
+    # 2. find weighted mean peak sample
+    SampArrMin, SampArrMax = np.amin(SampArr)-3, np.amax(SampArr)+4
+    # ChArrMin, ChArrMax = np.amin(ChArr), np.amax(ChArr)
+    
+    
+    WavePlus = get_padded(FilteredArr, SampArrMin, SampArrMax)
+    WavePlus = WavePlus[:, ChMask]
+    
+    # upsample WavePlus
+    upsampling_factor = Parameters['UPSAMPLING_FACTOR']
+    if upsampling_factor>1:
+        old_s = np.arange(WavePlus.shape[0])
+        new_s_i = np.arange((WavePlus.shape[0]-1)*upsampling_factor+1)
+        new_s = np.array(new_s_i*(1.0/upsampling_factor), dtype=np.float32)
+        f = interp1d(old_s, WavePlus, bounds_error=True, kind='cubic', axis=0)
+        UpsampledWavePlus = f(new_s)
+    else:
+        UpsampledWavePlus = WavePlus
+        
+    # find weighted mean peak for each channel above threshold
+    if Parameters['USE_WEIGHTED_MEAN_PEAK_SAMPLE']:
+        peak_sum = 0.0
+        total_weight = 0.0
+        for ch in xrange(WavePlus.shape[1]):
+            X = UpsampledWavePlus[:, ch]
+            if Parameters['DETECT_POSITIVE']:
+                X = -np.abs(X)
+            i_intpeak = np.argmin(X)
+            left, right = i_intpeak-1, i_intpeak+2
+            if right>len(X):
+                left, right = left+len(X)-right, len(X)
+            elif left<0:
+                left, right = 0, right-left
+            a_b_c = abc(np.arange(left, right, dtype=np.float32),
+                        X[left:right])
+            s_fracpeak = max_t(a_b_c)
+            weight = -X[i_intpeak]
+            if weight<0:
+                weight = 0
+            peak_sum += s_fracpeak*weight
+            total_weight += weight
+        s_fracpeak = (peak_sum/total_weight)
+    else:
+        if Parameters['DETECT_POSITIVE']:
+            X = -np.abs(UpsampledWavePlus)
+        else:
+            X = UpsampledWavePlus
+        s_fracpeak = 1.0*np.argmin(np.amin(X, axis=1))
+        
+    # s_fracpeak currently in coords of UpsampledWavePlus
+    s_fracpeak = s_fracpeak/upsampling_factor
+    # s_fracpeak now in coordinates of WavePlus
+    s_fracpeak += SampArrMin
+    # s_fracpeak now in coordinates of FilteredArr
+    
+    
+    
+    #################################
+    # NEW: FLOAT MASK
+    #################################
+    # connected component as window in chunk with Hilbert
+    # contains values only on weak threshold-exceeding points, 
+    # zeros everywhere else
+    comp = np.zeros((SampArrMax - SampArrMin, n_ch), dtype=FilteredHilbertArr.dtype)
+    comp[SampArr - SampArrMin, ChArr] = FilteredHilbertArr[SampArr, ChArr]
+    # 1D array: for each channel, the peak of the Hilbert, relative to the
+    # start of the chunk
+    peaks = np.argmax(comp, axis=0) + SampArrMin
+    # 1D array: values of the peaks, on each channel
+    peaks_values = FilteredHilbertArr[peaks, np.arange(0, n_ch)] * ChMask
+    FloatChMask = np.clip((peaks_values - ThresholdWeak) / (ThresholdStrong - ThresholdWeak), 0, 1)
+    
+    
+    
+    # #################################
+    # # New alignment
+    # #################################
+    # # In the window of the chunk (connected component), we take the clipped Hilbert 
+    # # (masks between 0 and 1).
+    # comp_clipped = np.clip((comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak), 0, 1)
+    # # now we take the weighted average of the sample times in the component
+    # s_fracpeak = np.sum(comp_clipped * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_clipped)
+    # s_fracpeak += SampArrMin
     
     
     #################################

@@ -96,7 +96,7 @@ def chunks(DatFileNames, n_ch_dat, ChannelsToUse):
         
 class FilWriter(object):
     def __init__(self, DatFileNames, n_ch_dat):
-        if not Parameters['WRITE_FIL_FILE']:
+        if (not Parameters['WRITE_FIL_FILE']) and (not Parameters['WRITE_BINFIL_FILE']):
             return
         # create .fil files, one for each .dat file, with matching names
         self.filenames = [basename_noext(n)+'.fil' for n in DatFileNames]
@@ -141,6 +141,8 @@ class FilWriter(object):
                 fd.write(FilteredChunkInt[a_start:a_end, :].flatten())
 
     def write_bin(self, BinaryChunk, s_start, s_end, keep_start, keep_end):
+        if not Parameters['WRITE_BINFIL_FILE']:
+            return
         if s_end>keep_end: # writing out the binary filtered data
             BinaryChunkInt = BinaryChunk[keep_start-s_start:keep_end-s_end, :]
             BinaryChunkInt = np.int16(BinaryChunkInt)
@@ -158,7 +160,6 @@ class FilWriter(object):
                 a_end = i_end-keep_start
                 fd.write(BinaryChunkInt[a_start:a_end, :].flatten())
         
-
 def get_chunk_for_thresholding(fd, n_ch_dat, ChannelsToUse, n_samples):
     '''
     Returns the initial chunk of the file for doing thresholding
@@ -191,14 +192,16 @@ def get_chunk_for_thresholding(fd, n_ch_dat, ChannelsToUse, n_samples):
 def shank_description(shanksize):
     s_total = Parameters['S_TOTAL']
     fpc = Parameters['FPC']
+    print 'shanksize = ', shanksize
+     #n_ch,  fpc ,s_total  = eval('(N_CH, FPC, S_TOTAL)', Parameters)
     class description(IsDescription):
         time = Int32Col()
         mask_binary = Int8Col(shape=(shanksize,))
         mask_float = Float32Col(shape=(shanksize,))
         features = Float32Col(shape=(1+fpc*shanksize,))
-        PC_3s = Float32Col(shape=(fpc*shanksize,))
+        PC_3s = Float32Col(shape=(fpc*s_total*shanksize,)) 
     return description
-
+    
 def waveform_description(shanksize):
     s_total = Parameters['S_TOTAL']
     class description(IsDescription):
