@@ -26,7 +26,7 @@ from masking import get_float_mask
 from log import log_message, log_warning
 from IPython import embed
 import debug
-from debug import plot_diagnostics # for debugging with Parameters['DEBUG'] 
+from debug import plot_diagnostics, plot_diagnostics_twothresholds# for debugging with Parameters['DEBUG'] 
 
 
 def set_globals_samples(sample_rate,high_frequency_factor):
@@ -325,7 +325,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         
         if Parameters['DEBUG']:  #TO DO: Change plot_diagnostics for the HILBERT case
             if Parameters['USE_HILBERT']:
-                plot_diagnostics_twothresholds(s_start,IndListsChunk,BinaryChunk,DatChunk,FilteredChunk,ThresholdStrong,ThresholdWeak)
+                plot_diagnostics_twothresholds(s_start,IndListsChunk,BinaryChunk,DatChunk,FilteredChunk,FilteredChunkHilbert,ThresholdStrong,ThresholdWeak)
             else:
                 plot_diagnostics(s_start,IndListsChunk,BinaryChunk,DatChunk,FilteredChunk,Threshold)
         if Parameters['WRITE_BINFIL_FILE']:
