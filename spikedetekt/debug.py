@@ -25,8 +25,8 @@ def plot_diagnostics(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,thr
 #    print 'Parameters: \n', Parameters
    # probefilename = Parameters['PROBE_FILE']
 #    print 'chunk_size_less = ', chunk_size_less
-    samples_forward = 80
-    samples_backward = 40
+    window_width = 120
+    samples_backward = 60
 
  # path='/home/skadir/alignment/'
     path = Parameters['OUTPUT_DIR']
@@ -39,7 +39,7 @@ def plot_diagnostics(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,thr
             debug_fd.write(str(interestpoint_ms)+':\n')
            # sampmin = interestpoint - s_start - 3
             sampmin = np.amax([0,interestpoint - s_start - samples_backward])
-            sampmax = sampmin + samples_forward 
+            sampmax = sampmin + window_width 
            # figdat= plt.figure()
           #  plt.figure()
           #   axdat = figdat.add_subplot(111) # stupid axis object (trivial subplot)
@@ -98,7 +98,11 @@ def plot_diagnostics(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,thr
             imcon = conaxis.imshow(np.transpose(connected_comp_enum[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imcon);
             sdaxis = plt.subplot(3,2,5)
             sdaxis.set_title('SDChunks',fontsize=10)
-            imsd = sdaxis.imshow(np.transpose(filteredchunk[sampmin:sampmax,:]/(-threshold[:])),interpolation="nearest");plt.colorbar(imsd);
+            if Parameters['USE_SINGLE_THRESHOLD']:
+                imsd = sdaxis.imshow(np.transpose(filteredchunk[sampmin:sampmax,:]/(-threshold)),interpolation="nearest");plt.colorbar(imsd);
+            else: 
+                imsd = sdaxis.imshow(np.transpose(filteredchunk[sampmin:sampmax,:]/(-threshold[:])),interpolation="nearest");plt.colorbar(imsd);
+
             #plt.savefig('%s_floodfillchunk_%s.pdf'%(path,interestpoint_ms))
             plt.savefig('floodfillchunk_%s.pdf'%(interestpoint_ms))
             
@@ -133,8 +137,8 @@ def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunk,datchunk,fil
 #    print 'Parameters: \n', Parameters
    # probefilename = Parameters['PROBE_FILE']
 #    print 'chunk_size_less = ', chunk_size_less
-    samples_forward = 80
-    samples_backward = 40
+    window_width = 120
+    samples_backward = 60
 
  # path='/home/skadir/alignment/'
     path = Parameters['OUTPUT_DIR']
@@ -147,7 +151,7 @@ def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunk,datchunk,fil
             debug_fd.write(str(interestpoint_ms)+':\n')
              # sampmin = interestpoint - s_start - 3
             sampmin = np.amax([0,interestpoint - s_start - samples_backward])
-            sampmax = sampmin + samples_forward 
+            sampmax = sampmin + window_width 
            # figdat= plt.figure()
           #  plt.figure()
           #   axdat = figdat.add_subplot(111) # stupid axis object (trivial subplot)
@@ -208,7 +212,7 @@ def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunk,datchunk,fil
            # filaxis.set_title('SDChunks',fontsize=10)
            # imfil = filaxis.imshow(filteredchunk[sampmin:sampmax,:]/(-threshold[:]),interpolation="nearest");plt.colorbar(imfil);
             hilaxis = plt.subplot(3,2,5)
-            hilaxis.set_title('HilbertChunks',fontsize=10)
+            hilaxis.set_title('ManipulatedChunks, in this case Hilbert: %s'%(Parameters['USE_HILBERT']),fontsize=10)
             imhil = hilaxis.imshow(np.transpose(hilbertchunk[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imhil);
             plt.savefig('floodfillchunk_%s.pdf'%(interestpoint_ms))
             

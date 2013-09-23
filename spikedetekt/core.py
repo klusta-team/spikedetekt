@@ -17,7 +17,7 @@ from files import (num_samples, klusters_files,
                    waveform_description, FilWriter)
 from filtering import apply_filtering, get_filter_params
 from progressbar import ProgressReporter
-from alignment import extract_wave, extract_wave_hilbert_old, extract_wave_hilbert_new, InterpolationError
+from alignment import extract_wave, extract_wave_hilbert_old, extract_wave_hilbert_new,extract_wave_twothresholds, InterpolationError
 from os.path import join, abspath, dirname
 from parameters import Parameters, GlobalVariables
 from time import sleep
@@ -245,7 +245,8 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
     S_BEFORE = Parameters['S_BEFORE']
     S_AFTER = Parameters['S_AFTER']
     THRESH_SD = Parameters['THRESH_SD']
-    
+    THRESH_SD_LOWER = Parameters['THRESH_SD_LOWER']
+
     # filter coefficents for the high pass filtering
     filter_params = get_filter_params()
 
@@ -277,6 +278,9 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
     if Parameters['USE_HILBERT']:
         ThresholdStrong = Parameters['THRESH_STRONG']
         ThresholdWeak = Parameters['THRESH_WEAK']
+    elif Parameters['USE_COMPONENT_ALIGNFLOATMASK']:#to be used with a single threshold only
+        ThresholdStrong = Threshold
+        ThresholdWeak = ThresholdSDFactor*THRESH_SD_LOWER
     
         
     n_samples = num_samples(DatFileNames, n_ch_dat)
@@ -299,22 +303,32 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             BinaryChunkStrong = FilteredChunkHilbert > ThresholdStrong
             BinaryChunkWeak = BinaryChunkWeak.astype(np.int8)
             BinaryChunkStrong = BinaryChunkStrong.astype(np.int8)
+        #elif Parameters['USE_COMPONENT_ALIGNFLOATMASK']:
         else: # Usual method
             FilteredChunk = apply_filtering(filter_params, DatChunk)
-        
-            # write filtered output to file
-            #if Parameters['WRITE_FIL_FILE']:
-            fil_writer.write(FilteredChunk, s_start, s_end, keep_start, keep_end)
-            if Parameters['DETECT_POSITIVE']:
-                BinaryChunk = np.abs(FilteredChunk)>Threshold
+            if Parameters['USE_COMPONENT_ALIGNFLOATMASK']:
+                if Parameters['DETECT_POSITIVE']:
+                    BinaryChunkWeak = FilteredChunk > ThresholdWeak
+                    BinaryChunkStrong = FilteredChunk > ThresholdStrong
+                else:
+                    BinaryChunkWeak = FilteredChunk < -ThresholdWeak
+                    BinaryChunkStrong = FilteredChunk < -ThresholdStrong
+                BinaryChunkWeak = BinaryChunkWeak.astype(np.int8)
+                BinaryChunkStrong = BinaryChunkStrong.astype(np.int8)
             else:
-                BinaryChunk = (FilteredChunk<-Threshold)
-            BinaryChunk = BinaryChunk.astype(np.int8)
+                if Parameters['DETECT_POSITIVE']:
+                    BinaryChunk = np.abs(FilteredChunk)>Threshold
+                else:
+                    BinaryChunk = (FilteredChunk<-Threshold)
+                BinaryChunk = BinaryChunk.astype(np.int8)
+        # write filtered output to file
+        if Parameters['WRITE_FIL_FILE']:
+            fil_writer.write(FilteredChunk, s_start, s_end, keep_start, keep_end)
         #    print 'I am here at line 313'
 
         ############### FLOOD FILL  ######################################
         ChannelGraphToUse = complete_if_none(ChannelGraph, N_CH)
-        if Parameters['USE_HILBERT']:
+        if (Parameters['USE_HILBERT'] or Parameters['USE_COMPONENT_ALIGNFLOATMASK']):
             IndListsChunk = connected_components_twothresholds(BinaryChunkWeak, BinaryChunkStrong,
                             ChannelGraphToUse, S_JOIN_CC)
             BinaryChunk = 1 * BinaryChunkWeak + 1 * BinaryChunkStrong
@@ -326,6 +340,8 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         if Parameters['DEBUG']:  #TO DO: Change plot_diagnostics for the HILBERT case
             if Parameters['USE_HILBERT']:
                 plot_diagnostics_twothresholds(s_start,IndListsChunk,BinaryChunk,DatChunk,FilteredChunk,FilteredChunkHilbert,ThresholdStrong,ThresholdWeak)
+            elif Parameters['USE_COMPONENT_ALIGNFLOATMASK']:
+                plot_diagnostics_twothresholds(s_start,IndListsChunk,BinaryChunk,DatChunk,FilteredChunk,-FilteredChunk,ThresholdStrong,ThresholdWeak)#TODO: change HIlbert in plot_diagnostics_twothresholds
             else:
                 plot_diagnostics(s_start,IndListsChunk,BinaryChunk,DatChunk,FilteredChunk,Threshold)
         if Parameters['WRITE_BINFIL_FILE']:
@@ -364,7 +380,41 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
                 # fcm = get_float_mask(wave, cm, ChannelGraphToUse,
                                      # 1.)
                 yield uwave, wave, s, cm, fcm
-            
+        elif Parameters['USE_COMPONENT_ALIGNFLOATMASK']:
+            for IndList in IndListsChunk:
+                try:
+                    if Parameters['DETECT_POSITIVE']:
+                        wave, s_peak, cm, fcm = extract_wave_twothresholds(IndList, FilteredChunk,
+                                                    FilteredChunk,
+                                                    S_BEFORE, S_AFTER, N_CH,
+                                                    s_start, ThresholdStrong, ThresholdWeak) 
+                    else:
+                        wave, s_peak, cm, fcm = extract_wave_twothresholds(IndList, FilteredChunk,
+                                                    -FilteredChunk,
+                                                    S_BEFORE, S_AFTER, N_CH,
+                                                    s_start, ThresholdStrong, ThresholdWeak)
+                    s_offset = s_start+s_peak
+                    if keep_start<=s_offset<keep_end:
+                        spike_count += 1
+                        nextbits.append((wave, s_offset, cm, fcm))
+                except np.linalg.LinAlgError:
+                    s = '*** WARNING *** Unalignable spike discarded in chunk {chunk}.'.format(
+                            chunk=(s_start, s_end))
+                    log_warning(s)
+                except InterpolationError:
+                    s = '*** WARNING *** Interpolation error in chunk {chunk}.'.format(
+                            chunk=(s_start, s_end))
+                    log_warning(s)
+            # and return them in time sorted order
+            nextbits.sort(key=lambda (wave, s, cm, fcm): s)
+            for wave, s, cm, fcm in nextbits:
+                uwave = get_padded(DatChunk, int(s)-S_BEFORE-s_start,
+                                   int(s)+S_AFTER-s_start).astype(np.int32)
+                # cm = add_penumbra(cm, ChannelGraphToUse,
+                                  # Parameters['PENUMBRA_SIZE'])
+                # fcm = get_float_mask(wave, cm, ChannelGraphToUse,
+                                     # 1.)
+                yield uwave, wave, s, cm, fcm   
         else:    #Original SpikeDetekt. This code duplication is regretable but probably easier to deal with
             
             for IndList in IndListsChunk:

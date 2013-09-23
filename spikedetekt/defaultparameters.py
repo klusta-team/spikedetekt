@@ -21,6 +21,7 @@ OUTPUT_NAME = None # the filename for created directories, use params filename i
 USE_SINGLE_THRESHOLD = True # use a single threshold for all channels
 CHUNKS_FOR_THRESH = 5 # number of chunks used to determine threshold for detection
 THRESH_SD = 4.5 # threshold for detection. standard deviations of signal
+THRESH_SD_LOWER = 2 # lower threshold for use with USE_COMPONENT_ALIGNFLOATMASK (see experimental options)
 DETECT_POSITIVE = False # detect spikes with positive threshold crossing
 
 #For use with the Hilbert transform
@@ -74,5 +75,6 @@ DO_GLOBAL_CLUSTERING = False
 SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
 DEBUG = False  #Use debug module
 USE_HILBERT = False   #Use Hilbert transform
-#OBSERVATION_TIMES = None #Observation times in ms for DEBUG option, e.g. [4630,4640]
+USE_COMPONENT_ALIGNFLOATMASK = False 
+OBSERVATION_TIMES = None #Observation times in ms for DEBUG option, e.g. [4630,4640]
 
