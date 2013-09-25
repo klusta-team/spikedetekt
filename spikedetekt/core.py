@@ -291,7 +291,8 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         FilteredChunk = apply_filtering(filter_params, DatChunk)
         
         # write filtered output to file
-        fil_writer.write(FilteredChunk, s_start, s_end, keep_start, keep_end)
+        if Parameters['WRITE_FIL_FILE']:
+            fil_writer.write(FilteredChunk, s_start, s_end, keep_start, keep_end)
 
         ############## THRESHOLDING #####################################
         
@@ -322,8 +323,8 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
                     BinaryChunk = (FilteredChunk<-Threshold)
                 BinaryChunk = BinaryChunk.astype(np.int8)
         # write filtered output to file
-        if Parameters['WRITE_FIL_FILE']:
-            fil_writer.write(FilteredChunk, s_start, s_end, keep_start, keep_end)
+        #if Parameters['WRITE_FIL_FILE']:
+        #    fil_writer.write(FilteredChunk, s_start, s_end, keep_start, keep_end)
         #    print 'I am here at line 313'
 
         ############### FLOOD FILL  ######################################
