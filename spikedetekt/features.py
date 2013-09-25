@@ -3,7 +3,7 @@ This module contains some functions for creating feature vectors.
 """
 import numpy as np
 from parameters import Parameters
-from IPython import embed
+#from IPython import embed
 
 def compute_pcs(X_ns):
     """Compute principal components of X_ns
