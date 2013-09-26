@@ -24,7 +24,7 @@ from time import sleep
 from subsets import cluster_withsubsets
 from masking import get_float_mask
 from log import log_message, log_warning
-from IPython import embed
+#from IPython import embed
 import debug
 from debug import plot_diagnostics # for debugging with Parameters['DEBUG'] 
 
