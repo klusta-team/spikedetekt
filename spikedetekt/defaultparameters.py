@@ -78,3 +78,4 @@ USE_HILBERT = False   #Use Hilbert transform
 USE_COMPONENT_ALIGNFLOATMASK = False 
 OBSERVATION_TIMES = None #Observation times in ms for DEBUG option, e.g. [4630,4640]
 OBSERVATION_TIMES_SAMPLES = None #Observation times in samples for DEBUG option
+USE_OLD_CC_CODE = False #Use old connected components not connected_components_twothresholds

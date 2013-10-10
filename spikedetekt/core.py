@@ -330,7 +330,16 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         ############### FLOOD FILL  ######################################
         ChannelGraphToUse = complete_if_none(ChannelGraph, N_CH)
         if (Parameters['USE_HILBERT'] or Parameters['USE_COMPONENT_ALIGNFLOATMASK']):
-            IndListsChunk = connected_components_twothresholds(BinaryChunkWeak, BinaryChunkStrong,
+            if Parameters['USE_OLD_CC_CODE']:
+                IndListsChunk = connected_components(BinaryChunkWeak,
+                            ChannelGraphToUse, S_JOIN_CC)
+                IndList = []  
+                for IndListWeak in IndListsChunk:
+                   # embed()
+                    if sum(BinaryChunkStrong[zip(*IndListWeak)]) != 0:
+                        IndList.append(IndListWeak)
+            else:
+                IndListsChunk = connected_components_twothresholds(BinaryChunkWeak, BinaryChunkStrong,
                             ChannelGraphToUse, S_JOIN_CC)
             BinaryChunk = 1 * BinaryChunkWeak + 1 * BinaryChunkStrong
         else:
