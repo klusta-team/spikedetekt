@@ -340,9 +340,9 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         
         if Parameters['DEBUG']:  #TO DO: Change plot_diagnostics for the HILBERT case
             if Parameters['USE_HILBERT']:
-                plot_diagnostics_twothresholds(s_start,IndListsChunk,BinaryChunk,DatChunk,FilteredChunk,FilteredChunkHilbert,ThresholdStrong,ThresholdWeak)
+                plot_diagnostics_twothresholds(s_start,IndListsChunk,BinaryChunkWeak, BinaryChunkStrong,BinaryChunk,DatChunk,FilteredChunk,FilteredChunkHilbert,ThresholdStrong,ThresholdWeak)
             elif Parameters['USE_COMPONENT_ALIGNFLOATMASK']:
-                plot_diagnostics_twothresholds(s_start,IndListsChunk,BinaryChunk,DatChunk,FilteredChunk,-FilteredChunk,ThresholdStrong,ThresholdWeak)#TODO: change HIlbert in plot_diagnostics_twothresholds
+                plot_diagnostics_twothresholds(s_start,IndListsChunk,BinaryChunkWeak,BinaryChunkStrong,BinaryChunk,DatChunk,FilteredChunk,-FilteredChunk,ThresholdStrong,ThresholdWeak)#TODO: change HIlbert in plot_diagnostics_twothresholds
             else:
                 plot_diagnostics(s_start,IndListsChunk,BinaryChunk,DatChunk,FilteredChunk,Threshold)
         if Parameters['WRITE_BINFIL_FILE']:

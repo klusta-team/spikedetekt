@@ -13,30 +13,41 @@ from IPython import embed # For manual debugging
 def plot_diagnostics(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,threshold):
   #  print "Printing globals", globals()
     debug_fd = GlobalVariables['debug_fd']
-    multdetection_times_ms = Parameters['OBSERVATION_TIMES']
-    multdetection_times =  np.array(multdetection_times_ms, dtype=np.int32)
+
     #print 'OBSERVATION TIMES are:', Parameters['OBSERVATION_TIMES'],'\n'
     samplingrate= Parameters['SAMPLERATE']
- #   samplingrate= 20000 
-    multdetection_times = multdetection_times*samplingrate/1000
-    multdetection_times = multdetection_times.astype(int)
+ 
+
+#  multdetection_times_ms = Parameters['OBSERVATION_TIMES']
+  #  multdetection_times =  np.array(multdetection_times_ms, dtype=np.int32)
+  #  multdetection_times = multdetection_times*samplingrate/1000
+  #  multdetection_times = multdetection_times.astype(int)
+
+    multdetection_times = Parameters['OBSERVATION_TIMES_SAMPLES']
+
+
+
     chunk_size_less= Parameters['CHUNK_SIZE']-200
 #-Parameters['CHUNK_OVERLAP']
 #    print 'Parameters: \n', Parameters
    # probefilename = Parameters['PROBE_FILE']
 #    print 'chunk_size_less = ', chunk_size_less
-    window_width = 120
-    samples_backward = 60
+    #window_width = 120
+    #samples_backward = 60
+    window_width = 140
+    samples_backward = 70
 
  # path='/home/skadir/alignment/'
     path = Parameters['OUTPUT_DIR']
-   #  for interestpoint in multdetection_times:
-    for interestpoint_ms in multdetection_times_ms:
-        interestpoint = int(interestpoint_ms*samplingrate/1000)
+    for interestpoint in multdetection_times:
+    #for interestpoint_ms in multdetection_times_ms:
+    #    interestpoint = int(interestpoint_ms*samplingrate/1000)
    #      pp = PdfPages('/home/skadir/alignment/multipagegraphs.pdf')
         if (interestpoint - chunk_size_less) <= s_start < (interestpoint):
-            print interestpoint_ms, ':\n'
-            debug_fd.write(str(interestpoint_ms)+':\n')
+      #      print interestpoint_ms, ':\n'
+      #      debug_fd.write(str(interestpoint_ms)+':\n')
+            print interestpoint, ':\n'
+            debug_fd.write(str(interestpoint)+':\n')
            # sampmin = interestpoint - s_start - 3
             sampmin = np.amax([0,interestpoint - s_start - samples_backward])
             sampmax = sampmin + window_width 
@@ -82,7 +93,8 @@ def plot_diagnostics(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,thr
                     debug_fd.flush()       # makes sure everything is written to the debug file as program proceeds 
 
             plt.figure()
-            plt.suptitle('%s \n with %s \n Time %s ms'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint_ms), fontsize=10, fontweight='bold')
+          #  plt.suptitle('%s \n with %s \n Time %s ms'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint_ms), fontsize=10, fontweight='bold')
+            plt.suptitle('%s \n with %s \n Time %s samples'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint), fontsize=10, fontweight='bold')
             plt.subplots_adjust(hspace = 0.5)
             dataxis = plt.subplot(3,2,1)
             dataxis.set_title('DatChunks',fontsize=10)
@@ -104,7 +116,8 @@ def plot_diagnostics(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,thr
                 imsd = sdaxis.imshow(np.transpose(filteredchunk[sampmin:sampmax,:]/(-threshold[:])),interpolation="nearest");plt.colorbar(imsd);
 
             #plt.savefig('%s_floodfillchunk_%s.pdf'%(path,interestpoint_ms))
-            plt.savefig('floodfillchunk_%s.pdf'%(interestpoint_ms))
+            #plt.savefig('floodfillchunk_%s.pdf'%(interestpoint_ms))
+            plt.savefig('floodfillchunk_%s_samples.pdf'%(interestpoint))
             
 # plt.show()
    #         plt.figure();plt.imshow(binarychunk[sampmin:sampmax,:],interpolation="nearest");plt.colorbar();plt.savefig(pp,format='pdf')
@@ -122,33 +135,42 @@ def plot_diagnostics(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,thr
     #     pp.close()
 
 #Grossly inelegant, but will do for now. For use with the Hilbert transform
-def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,hilbertchunk,ThresholdStrong, ThresholdWeak):
+def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunkweak, binarychunkstrong,binarychunk,datchunk,filteredchunk,hilbertchunk,ThresholdStrong, ThresholdWeak):
   #  print "Printing globals", globals()
     debug_fd = GlobalVariables['debug_fd']
     
     samplingrate= Parameters['SAMPLERATE']
  #   samplingrate= 20000 
-    multdetection_times_ms = Parameters['OBSERVATION_TIMES']
-    multdetection_times =  np.array(multdetection_times_ms, dtype=np.int32)
-    multdetection_times = multdetection_times*samplingrate/1000
-    multdetection_times = multdetection_times.astype(int)
+  
+#  multdetection_times_ms = Parameters['OBSERVATION_TIMES']
+  #  multdetection_times =  np.array(multdetection_times_ms, dtype=np.int32)
+  #  multdetection_times = multdetection_times*samplingrate/1000
+  #  multdetection_times = multdetection_times.astype(int)
+
+    multdetection_times = Parameters['OBSERVATION_TIMES_SAMPLES']
+
     chunk_size_less= Parameters['CHUNK_SIZE']-200
 #-Parameters['CHUNK_OVERLAP']
 #    print 'Parameters: \n', Parameters
    # probefilename = Parameters['PROBE_FILE']
 #    print 'chunk_size_less = ', chunk_size_less
-    window_width = 120
-    samples_backward = 60
+#    window_width = 120
+#    samples_backward = 60
+    window_width = 140
+    samples_backward = 70
 
  # path='/home/skadir/alignment/'
     path = Parameters['OUTPUT_DIR']
-   #  for interestpoint in multdetection_times:
-    for interestpoint_ms in multdetection_times_ms:
-        interestpoint = int(interestpoint_ms*samplingrate/1000)
-   #      pp = PdfPages('/home/skadir/alignment/multipagegraphs.pdf')
+    for interestpoint in multdetection_times:
+   # for interestpoint_ms in multdetection_times_ms:
+    #    interestpoint = int(interestpoint_ms*samplingrate/1000)
+  
+ #      pp = PdfPages('/home/skadir/alignment/multipagegraphs.pdf')
         if (interestpoint - chunk_size_less) <= s_start < (interestpoint):
-            print interestpoint_ms, ':\n'
-            debug_fd.write(str(interestpoint_ms)+':\n')
+            #print interestpoint_ms, ':\n'
+            #debug_fd.write(str(interestpoint_ms)+':\n')
+            print interestpoint, ':\n'
+            debug_fd.write(str(interestpoint)+':\n')
              # sampmin = interestpoint - s_start - 3
             sampmin = np.amax([0,interestpoint - s_start - samples_backward])
             sampmax = sampmin + window_width 
@@ -181,6 +203,15 @@ def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunk,datchunk,fil
             j = 0
             for k,indlist in enumerate(indlistchunk):
                 indtemparray = np.array(indlist)
+                #print k,':',indlist, '\n'
+               # print '\n'
+               # j = j+1
+               # connected_comp_enum[indtemparray[:,0],indtemparray[:,1]] = j
+                
+               # debug_fd.write(str(k)+': '+'\n')
+               # debug_fd.write(str(indlist)+'\n')
+               # debug_fd.write('\n') 
+               # debug_fd.flush()   
                 if (set(indtemparray[:,0]).intersection(np.arange(sampmin,sampmax+1)) != set()):
                     
                     print k,':',indlist, '\n'
@@ -194,27 +225,35 @@ def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunk,datchunk,fil
                     debug_fd.flush()       # makes sure everything is written to the debug file as program proceeds 
 
             plt.figure()
-            plt.suptitle('%s \n with %s \n Time %s ms'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint_ms), fontsize=10, fontweight='bold')
+            #plt.suptitle('%s \n with %s \n Time %s ms'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint_ms), fontsize=10, fontweight='bold')
+            plt.suptitle('%s \n with %s \n Time %s samples'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint), fontsize=10, fontweight='bold')
            # plt.suptitle('Time %s ms'%(interestpoint_ms), fontsize=14, fontweight='bold')
             plt.subplots_adjust(hspace = 0.5)
-            dataxis = plt.subplot(3,2,1)
+            dataxis = plt.subplot(4,2,1)
             dataxis.set_title('DatChunks',fontsize=10)
             imdat = dataxis.imshow(np.transpose(datchunk[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imdat);
-            binaxis = plt.subplot(3,2,3)
+            binaxis = plt.subplot(4,2,3)
             binaxis.set_title('FilteredChunks',fontsize=10)
             imbin = binaxis.imshow(np.transpose(filteredchunk[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imbin);
-            filaxis = plt.subplot(3,2,2)
+            filaxis = plt.subplot(4,2,2)
             filaxis.set_title('BinChunks',fontsize=10)
             imfil = filaxis.imshow(np.transpose(binarychunk[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imfil);
-            conaxis = plt.subplot(3,2,4)
+            conaxis = plt.subplot(4,2,8)
             conaxis.set_title('Connected Components',fontsize=10)
             imcon = conaxis.imshow(np.transpose(connected_comp_enum[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imcon);
+            constrongaxis = plt.subplot(4,2,4)
+            constrongaxis.set_title('Strong Connected Components',fontsize=10)
+            imconstrong = constrongaxis.imshow(np.transpose(binarychunkstrong[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imconstrong);
+            conweakaxis = plt.subplot(4,2,6)
+            conweakaxis.set_title('Weak Connected Components',fontsize=10)
+            imconweak = conweakaxis.imshow(np.transpose(binarychunkweak[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imconweak);
            # filaxis.set_title('SDChunks',fontsize=10)
            # imfil = filaxis.imshow(filteredchunk[sampmin:sampmax,:]/(-threshold[:]),interpolation="nearest");plt.colorbar(imfil);
-            hilaxis = plt.subplot(3,2,5)
-            hilaxis.set_title('ManipulatedChunks, in this case Hilbert: %s'%(Parameters['USE_HILBERT']),fontsize=10)
+            hilaxis = plt.subplot(4,2,5)
+            hilaxis.set_title('ManipulatedChunks, Hilbert: %s'%(Parameters['USE_HILBERT']),fontsize=10)
             imhil = hilaxis.imshow(np.transpose(hilbertchunk[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imhil);
-            plt.savefig('floodfillchunk_%s.pdf'%(interestpoint_ms))
+            #plt.savefig('floodfillchunk_%s.pdf'%(interestpoint_ms))
+            plt.savefig('floodfillchunk_%s_samples.pdf'%(interestpoint))
             
             
 # plt.show()
