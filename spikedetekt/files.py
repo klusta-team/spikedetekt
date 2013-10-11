@@ -224,12 +224,13 @@ def klusters_files(h5s, shank_table, basename, probe):
         write_spk_buffered(shank_table['waveforms', shank],
                            'unfiltered_wave', basename+'.uspk.'+str(shank),
                            np.arange(len(time)))
-        write_xml(probe,
-                  n_ch=Parameters['N_CH'],
-                  n_samp=Parameters['S_TOTAL'],
-                  n_feat=Parameters['FPC'],
-                  sample_rate=Parameters['SAMPLE_RATE'],
-                  filepath=basename+'.xml')
+        if Parameters['WRITE_XML_FILE']:
+            write_xml(probe,
+                      n_ch=Parameters['N_CH'],
+                      n_samp=Parameters['S_TOTAL'],
+                      n_feat=Parameters['FPC'],
+                      sample_rate=Parameters['SAMPLE_RATE'],
+                      filepath=basename+'.xml')
         # compute feature masks from channel masks
         M = np.repeat(T.cols.mask_binary[:], Parameters['FPC'], axis=1)
         M = np.hstack((M, np.zeros(M.shape[0], dtype=M.dtype)[:, np.newaxis]))

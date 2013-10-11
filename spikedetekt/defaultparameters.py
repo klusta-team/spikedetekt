@@ -64,15 +64,19 @@ CHUNK_OVERLAP_SECONDS = 0.01 # overlap time (in seconds) of chunks, should be wi
 # Maximum number of spikes to process
 MAX_SPIKES = None # None for all spikes, or an int
 
+#Options for writing .xml file
+WRITE_XML_FILE = True #If you already have an .xml file for use with the Neuroscope, Klusters suite, you can set this to False and it will not be overwritten
+VOLTAGE_RANGE = 20
+AMPLIFICATION = 1000
+OFFSET = 2048
+
+
 # Experimental options
 DO_GLOBAL_CLUSTERING = False
 SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
 KEEP_OLD_HDF5_FILES = False
 DEBUG = False
 
-#Options for writing .xml file
-VOLTAGE_RANGE = 20
-AMPLIFICATION = 1000
-OFFSET = 2048
+
 
 
