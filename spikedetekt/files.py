@@ -344,9 +344,9 @@ def write_xml(probe,n_ch,n_samp,n_feat,sample_rate,filepath):
     SubElement(acquisitionSystem,'nBits').text = '16'
     SubElement(acquisitionSystem,'nChannels').text = str(n_ch)
     SubElement(acquisitionSystem,'samplingRate').text = str(int(sample_rate))
-    SubElement(acquisitionSystem,'voltageRange').text = '20'
-    SubElement(acquisitionSystem,'amplification').text = "1000"
-    SubElement(acquisitionSystem,'offset').text = "2048"
+    SubElement(acquisitionSystem,'voltageRange').text = str(Parameters['VOLTAGE_RANGE'])
+    SubElement(acquisitionSystem,'amplification').text = str(Parameters['AMPLIFICATION'])
+    SubElement(acquisitionSystem,'offset').text = str(Parameters['OFFSET'])
     
     anatomicalDescription = SubElement(SubElement(parameters,'anatomicalDescription'),'channelGroups')
     for shank in probe.shanks_set:

@@ -70,4 +70,9 @@ SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occur
 KEEP_OLD_HDF5_FILES = False
 DEBUG = False
 
+#Options for writing .xml file
+VOLTAGE_RANGE = 20
+AMPLIFICATION = 1000
+OFFSET = 2048
+
 
