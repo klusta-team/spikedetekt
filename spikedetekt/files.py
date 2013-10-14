@@ -12,6 +12,7 @@ from parameters import Parameters
 
 #m chops n_samples into chunks according to chunk_size,overlap
 #m Overlap probably controls for the artifacts of filtering on the ends of the signal?
+#chunk_bounds() is used by chunk() defined below
 def chunk_bounds(n_samples, chunk_size, overlap):
     '''
     Returns chunks of the form:
@@ -38,7 +39,7 @@ def chunk_bounds(n_samples, chunk_size, overlap):
     keep_end = s_end
     yield s_start,s_end,keep_start,keep_end   
 
-
+#datfiles_sizes is used by chunk() defined below
 def datfile_sizes(DatFileNames, n_ch_dat):
     DTYPE = Parameters['DTYPE']
     dtype_size = np.nbytes[DTYPE]
@@ -189,6 +190,8 @@ def get_chunk_for_thresholding(fd, n_ch_dat, ChannelsToUse, n_samples):
 #        float_fet_mask = Float32Col(shape=(1+FPC*N_CH,))
 #    return description
 
+#IMPORTANT: Here you describe the attributes of  t = shank_table['spikedetekt', shank]
+# in core.py, e.g. time, float_time
 def shank_description(shanksize):
     s_total = Parameters['S_TOTAL']
     fpc = Parameters['FPC']
@@ -196,6 +199,7 @@ def shank_description(shanksize):
      #n_ch,  fpc ,s_total  = eval('(N_CH, FPC, S_TOTAL)', Parameters)
     class description(IsDescription):
         time = Int32Col()
+        float_time = Float32Col()
         mask_binary = Int8Col(shape=(shanksize,))
         mask_float = Float32Col(shape=(shanksize,))
         features = Float32Col(shape=(1+fpc*shanksize,))
@@ -216,20 +220,23 @@ def klusters_files(h5s, shank_table, basename, probe):
         T = shank_table['spikedetekt', shank]
         write_fet(T.cols.features[:], basename+'.fet.'+str(shank))
         time = T.cols.time[:]
+        float_time = T.cols.float_time[:]
         write_trivial_clu(time, basename+'.clu.'+str(shank))
         write_res(time, basename+'.res.'+str(shank))
+        write_float_res(float_time, basename+'.float.res.'+str(shank))
         write_spk_buffered(shank_table['waveforms', shank],
                            'wave', basename+'.spk.'+str(shank),
                            np.arange(len(time)))
         write_spk_buffered(shank_table['waveforms', shank],
                            'unfiltered_wave', basename+'.uspk.'+str(shank),
                            np.arange(len(time)))
-        write_xml(probe,
-                  n_ch=Parameters['N_CH'],
-                  n_samp=Parameters['S_TOTAL'],
-                  n_feat=Parameters['FPC'],
-                  sample_rate=Parameters['SAMPLE_RATE'],
-                  filepath=basename+'.xml')
+        if Parameters['WRITE_XML_FILE']:
+            write_xml(probe,
+                      n_ch=Parameters['N_CH'],
+                      n_samp=Parameters['S_TOTAL'],
+                      n_feat=Parameters['FPC'],
+                      sample_rate=Parameters['SAMPLE_RATE'],
+                      filepath=basename+'.xml')
         # compute feature masks from channel masks
         M = np.repeat(T.cols.mask_binary[:], Parameters['FPC'], axis=1)
         M = np.hstack((M, np.zeros(M.shape[0], dtype=M.dtype)[:, np.newaxis]))
@@ -311,6 +318,11 @@ def write_res(samples,filepath):
     """input: 1D vector of times shape = (n_times,) or (n_times, 1)
     output: writes .res file, which has integer sample numbers"""
     np.savetxt(filepath,samples,fmt="%i")
+
+def write_float_res(samples,filepath):
+    """input: 1D vector of times shape = (n_times,) or (n_times, 1)
+    output: writes .res file, which has float sample numbers"""
+    np.savetxt(filepath,samples,fmt="%10.1f")
     
 def read_res(filepath):
     """reads .res file, which is just a list of integer sample numbers"""
@@ -347,9 +359,9 @@ def write_xml(probe,n_ch,n_samp,n_feat,sample_rate,filepath):
     SubElement(acquisitionSystem,'nBits').text = '16'
     SubElement(acquisitionSystem,'nChannels').text = str(n_ch)
     SubElement(acquisitionSystem,'samplingRate').text = str(int(sample_rate))
-    SubElement(acquisitionSystem,'voltageRange').text = '20'
-    SubElement(acquisitionSystem,'amplification').text = "1000"
-    SubElement(acquisitionSystem,'offset').text = "2048"
+    SubElement(acquisitionSystem,'voltageRange').text = str(Parameters['VOLTAGE_RANGE'])
+    SubElement(acquisitionSystem,'amplification').text = str(Parameters['AMPLIFICATION'])
+    SubElement(acquisitionSystem,'offset').text = str(Parameters['OFFSET'])    
     
     anatomicalDescription = SubElement(SubElement(parameters,'anatomicalDescription'),'channelGroups')
     for shank in probe.shanks_set:

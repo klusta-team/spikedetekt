@@ -160,7 +160,7 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
                        np.hstack((0, np.cumsum(n_samples)))[:-1])
     
     ########## MAIN TIME CONSUMING LOOP OF PROGRAM ########################
-    for (USpk, Spk, PeakSample,
+    for (USpk, Spk, PeakSample,FracPeakSample,
          ChannelMask, FloatChannelMask) in extract_spikes(h5s, basename,
                                                           DatFileNames,
                                                           n_ch_dat,
@@ -179,6 +179,7 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
         channel_list = np.array(sorted(list(probe.channel_set[shank])))
         t = shank_table['spikedetekt', shank]
         t.row['time'] = PeakSample
+        t.row['float_time'] = FracPeakSample
         t.row['mask_binary'] = ChannelMask[channel_list]
         t.row['mask_float'] = FloatChannelMask[channel_list]
         t.row.append()
@@ -226,7 +227,7 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
 ############# Spike extraction helper functions ###########    
 ###########################################################
 
-#m  
+# Add FracPeakSample to return the fractional peak sample time
 #m this function returns for each detected spike a triplet Spk,PeakSample,ST
 #m Spk is an array of shape no. of samples (to record for each spike) x no. of channels, e.g., 28X16
 #m PeakSample is the position of the peak (e.g. 435688)
@@ -333,7 +334,9 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             if Parameters['USE_OLD_CC_CODE']:
                 IndListsChunkOld = connected_components(BinaryChunkWeak,
                             ChannelGraphToUse, S_JOIN_CC)
-                IndListsChunk = []  
+                IndListsChunk = []  #Final list of connected components. Go through all \weak' connected components
+            # and only include in final list if there are some samples that also exceed the strong threshold
+            # This method works better than connected_components_twothresholds.
                 for IndListWeak in IndListsChunkOld:
                    # embed()
 #                    if sum(BinaryChunkStrong[zip(*IndListWeak)]) != 0:
@@ -366,14 +369,15 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             
             for IndList in IndListsChunk:
                 try:
-                    wave, s_peak, cm, fcm = extract_wave_hilbert_new(IndList, FilteredChunk,
+                    wave, s_peak, sf_peak, cm, fcm = extract_wave_hilbert_new(IndList, FilteredChunk,
                                                     FilteredChunkHilbert,
                                                     S_BEFORE, S_AFTER, N_CH,
                                                     s_start, ThresholdStrong, ThresholdWeak)
-                    s_offset = s_start+s_peak
+                    s_offset = s_start + s_peak
+                    sf_offset = s_start + sf_peak
                     if keep_start<=s_offset<keep_end:
                         spike_count += 1
-                        nextbits.append((wave, s_offset, cm, fcm))
+                        nextbits.append((wave, s_offset, sf_offset, cm, fcm))
                 except np.linalg.LinAlgError:
                     s = '*** WARNING *** Unalignable spike discarded in chunk {chunk}.'.format(
                             chunk=(s_start, s_end))
@@ -383,32 +387,34 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
                             chunk=(s_start, s_end))
                     log_warning(s)
             # and return them in time sorted order
-            nextbits.sort(key=lambda (wave, s, cm, fcm): s)
-            for wave, s, cm, fcm in nextbits:
+            nextbits.sort(key=lambda (wave, s, s_frac, cm, fcm): s_frac)
+            for wave, s, s_frac, cm, fcm in nextbits:
                 uwave = get_padded(DatChunk, int(s)-S_BEFORE-s_start,
                                    int(s)+S_AFTER-s_start).astype(np.int32)
                 # cm = add_penumbra(cm, ChannelGraphToUse,
                                   # Parameters['PENUMBRA_SIZE'])
                 # fcm = get_float_mask(wave, cm, ChannelGraphToUse,
                                      # 1.)
-                yield uwave, wave, s, cm, fcm
+                yield uwave, wave, s, s_frac, cm, fcm
+                # unfiltered wave,wave, s_peak, ChMask, FloatChMask
         elif Parameters['USE_COMPONENT_ALIGNFLOATMASK']:
             for IndList in IndListsChunk:
                 try:
                     if Parameters['DETECT_POSITIVE']:
-                        wave, s_peak, cm, fcm = extract_wave_twothresholds(IndList, FilteredChunk,
+                        wave, s_peak, sf_peak, cm, fcm = extract_wave_twothresholds(IndList, FilteredChunk,
                                                     FilteredChunk,
                                                     S_BEFORE, S_AFTER, N_CH,
                                                     s_start, ThresholdStrong, ThresholdWeak) 
                     else:
-                        wave, s_peak, cm, fcm = extract_wave_twothresholds(IndList, FilteredChunk,
+                        wave, s_peak, sf_peak, cm, fcm = extract_wave_twothresholds(IndList, FilteredChunk,
                                                     -FilteredChunk,
                                                     S_BEFORE, S_AFTER, N_CH,
                                                     s_start, ThresholdStrong, ThresholdWeak)
                     s_offset = s_start+s_peak
+                    sf_offset = s_start + sf_peak
                     if keep_start<=s_offset<keep_end:
                         spike_count += 1
-                        nextbits.append((wave, s_offset, cm, fcm))
+                        nextbits.append((wave, s_offset, sf_offset, cm, fcm))
                 except np.linalg.LinAlgError:
                     s = '*** WARNING *** Unalignable spike discarded in chunk {chunk}.'.format(
                             chunk=(s_start, s_end))
@@ -418,40 +424,43 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
                             chunk=(s_start, s_end))
                     log_warning(s)
             # and return them in time sorted order
-            nextbits.sort(key=lambda (wave, s, cm, fcm): s)
-            for wave, s, cm, fcm in nextbits:
+            nextbits.sort(key=lambda (wave, s, s_frac, cm, fcm): s_frac)
+            for wave, s, s_frac, cm, fcm in nextbits:
                 uwave = get_padded(DatChunk, int(s)-S_BEFORE-s_start,
                                    int(s)+S_AFTER-s_start).astype(np.int32)
                 # cm = add_penumbra(cm, ChannelGraphToUse,
                                   # Parameters['PENUMBRA_SIZE'])
                 # fcm = get_float_mask(wave, cm, ChannelGraphToUse,
                                      # 1.)
-                yield uwave, wave, s, cm, fcm   
+                yield uwave, wave, s, s_frac, cm, fcm   
+                # unfiltered wave,wave, s_peak, ChMask, FloatChMask
         else:    #Original SpikeDetekt. This code duplication is regretable but probably easier to deal with
             
             for IndList in IndListsChunk:
                 try:
-                    wave, s_peak, cm = extract_wave(IndList, FilteredChunk,
+                    wave, s_peak, sf_peak, cm = extract_wave(IndList, FilteredChunk,
                                                     S_BEFORE, S_AFTER, N_CH,
                                                     s_start,Threshold)
                     s_offset = s_start+s_peak
+                    sf_offset = s_start + sf_peak
                     if keep_start<=s_offset<keep_end:
                         spike_count += 1
-                        nextbits.append((wave, s_offset, cm))
+                        nextbits.append((wave, s_offset, sf_offset, cm))
                 except np.linalg.LinAlgError:
                     s = '*** WARNING *** Unalignable spike discarded in chunk {chunk}.'.format(
                             chunk=(s_start, s_end))
                     log_warning(s)
             # and return them in time sorted order
-            nextbits.sort(key=lambda (wave, s, cm): s)
-            for wave, s, cm in nextbits:
+            nextbits.sort(key=lambda (wave, s, s_frac, cm): s_frac)
+            for wave, s, s_frac, cm in nextbits:
                 uwave = get_padded(DatChunk, int(s)-S_BEFORE-s_start,
                                    int(s)+S_AFTER-s_start).astype(np.int32)
                 cm = add_penumbra(cm, ChannelGraphToUse,
                                   Parameters['PENUMBRA_SIZE'])
                 fcm = get_float_mask(wave, cm, ChannelGraphToUse,
                                      ThresholdSDFactor)
-                yield uwave, wave, s, cm, fcm
+                yield uwave, wave, s, s_frac, cm, fcm    
+                # unfiltered wave,wave, s_peak, ChMask, FloatChMask
 
         progress_bar.update(float(s_end)/n_samples,
             '%d/%d samples, %d spikes found'%(s_end, n_samples, spike_count))

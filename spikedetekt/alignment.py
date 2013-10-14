@@ -211,7 +211,7 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start,Thre
     f = interp1d(old_s, WaveBlock, bounds_error=True, kind='cubic', axis=0)
     Wave = f(new_s)
     
-    return Wave, s_peak, ChMask
+    return Wave, s_peak, s_fracpeak, ChMask
 
 def extract_wave_twothresholds(IndList, FilteredArr, ManipulatedArr, s_before, 
                      s_after, n_ch, s_start, ThresholdStrong, ThresholdWeak):
@@ -354,7 +354,7 @@ def extract_wave_twothresholds(IndList, FilteredArr, ManipulatedArr, s_before,
         raise InterpolationError
     Wave = f(new_s)
     
-    return Wave, s_peak, ChMask, FloatChMask
+    return Wave, s_peak, s_fracpeak, ChMask, FloatChMask
 
 def extract_wave_hilbert_new(IndList, FilteredArr, FilteredHilbertArr, s_before, 
                      s_after, n_ch, s_start, ThresholdStrong, ThresholdWeak):
@@ -445,7 +445,7 @@ def extract_wave_hilbert_new(IndList, FilteredArr, FilteredHilbertArr, s_before,
         raise InterpolationError
     Wave = f(new_s)
     
-    return Wave, s_peak, ChMask, FloatChMask
+    return Wave, s_peak, s_fracpeak, ChMask, FloatChMask
 
 def extract_wave_hilbert_old(IndList, FilteredArr, FilteredHilbertArr, s_before, 
                      s_after, n_ch, s_start, ThresholdStrong, ThresholdWeak):
@@ -590,4 +590,4 @@ def extract_wave_hilbert_old(IndList, FilteredArr, FilteredHilbertArr, s_before,
     
     
     
-    return Wave, s_peak, ChMask, FloatChMask
+    return Wave, s_peak, s_fracpeak, ChMask, FloatChMask

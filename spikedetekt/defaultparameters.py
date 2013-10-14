@@ -70,6 +70,13 @@ CHUNK_OVERLAP_SECONDS = 0.015 # overlap time (in seconds) of chunks, should be w
 # Maximum number of spikes to process
 MAX_SPIKES = None # None for all spikes, or an int
 
+#Options for writing .xml file
+WRITE_XML_FILE = True #If you already have an .xml file for use with the Neuroscope, Klusters suite, you can set this to False and it will not be overwritten
+VOLTAGE_RANGE = 20
+AMPLIFICATION = 1000
+OFFSET = 2048
+
+
 # Experimental options
 DO_GLOBAL_CLUSTERING = False
 SORT_CLUS_BY_CHANNEL = False # Sort clusters by the channel where the peak occurs
@@ -78,4 +85,4 @@ USE_HILBERT = False   #Use Hilbert transform
 USE_COMPONENT_ALIGNFLOATMASK = False 
 OBSERVATION_TIMES = None #Observation times in ms for DEBUG option, e.g. [4630,4640]
 OBSERVATION_TIMES_SAMPLES = None #Observation times in samples for DEBUG option
-USE_OLD_CC_CODE = False #Use old connected components not connected_components_twothresholds
+USE_OLD_CC_CODE = True #Use old connected components not connected_components_twothresholds

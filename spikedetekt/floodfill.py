@@ -5,6 +5,8 @@ from numpy import *
 from itertools import izip
 import numpy as np
 
+#connected_components_twothresholds - This seems to work now, but keep an eye on it
+# It fails 2 out of 22000 spikes for some reason...
 def connected_components_twothresholds(st_arr, st_arr_strong, ch_graph, s_back):
     '''
     Returns a list of pairs (samp, chan) of the connected components in the 2D
@@ -70,6 +72,7 @@ def connected_components_twothresholds(st_arr, st_arr_strong, ch_graph, s_back):
                         label_buffer[i_s, i_ch] = adjlabel
                         # and add it to the list for the labelled component
                         comp_inds[adjlabel].append((i_s, i_ch))
+
                     elif curlabel!=adjlabel:
                         # if the current element is unequal to the adjacent
                         # one, we merge them by reassigning the elements of the
@@ -90,11 +93,16 @@ def connected_components_twothresholds(st_arr, st_arr_strong, ch_graph, s_back):
                         # add them to the current label list, and remove the
                         # adjacent component entirely
                         comp_inds[curlabel].extend(comp_inds.pop(adjlabel))
+                        #did not deal with merge condition, now fixed it seems...
+                        if adjlabel in strong_nodes:
+                            strong_nodes.add(curlabel)
                         
                     # NEW: add the current component label to the set of all
                     # strong nodes, if the current node is strong
+
                     if curlabel > 0 and st_arr_strong[i_s, i_ch]:
-                        strong_nodes.add(curlabel)
+                        strong_nodes.add(curlabel) 
+                  
                         
         if label_buffer[i_s, i_ch]==0:
             # if nothing is adjacent, we have the beginnings of a new component,
