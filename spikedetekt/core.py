@@ -266,6 +266,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         # get the STD of the beginning of the filtered data
         if Parameters['USE_HILBERT']:
             first_chunks_std = np.std(FilteredChunk)
+            print 'first_chunks_std',  first_chunks_std, '\n'
         else:
             if Parameters['USE_SINGLE_THRESHOLD']:
                 ThresholdSDFactor = np.median(np.abs(FilteredChunk))/.6745
@@ -307,7 +308,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             BinaryChunkStrong = BinaryChunkStrong.astype(np.int8)
         #elif Parameters['USE_COMPONENT_ALIGNFLOATMASK']:
         else: # Usual method
-            FilteredChunk = apply_filtering(filter_params, DatChunk)
+            #FilteredChunk = apply_filtering(filter_params, DatChunk) Why did you filter twice!!!???
             if Parameters['USE_COMPONENT_ALIGNFLOATMASK']:
                 if Parameters['DETECT_POSITIVE']:
                     BinaryChunkWeak = FilteredChunk > ThresholdWeak
@@ -362,7 +363,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         if Parameters['WRITE_BINFIL_FILE']:
             fil_writer.write_bin(BinaryChunk, s_start, s_end, keep_start, keep_end)
         
-        print len(IndListsChunk)
+        print len(IndListsChunk), 'len(IndListsChunk)'
         ############## ALIGN AND INTERPOLATE WAVES #######################
         nextbits = []
         if Parameters['USE_HILBERT']:
