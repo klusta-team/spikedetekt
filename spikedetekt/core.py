@@ -250,6 +250,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
 
     # filter coefficents for the high pass filtering
     filter_params = get_filter_params()
+    print filter_params
 
     progress_bar = ProgressReporter()
     

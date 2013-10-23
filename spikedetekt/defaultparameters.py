@@ -86,3 +86,5 @@ USE_COMPONENT_ALIGNFLOATMASK = False
 OBSERVATION_TIMES = None #Observation times in ms for DEBUG option, e.g. [4630,4640]
 OBSERVATION_TIMES_SAMPLES = None #Observation times in samples for DEBUG option
 USE_OLD_CC_CODE = True #Use old connected components not connected_components_twothresholds
+AMPLITUDE_WEIGHT = True #Use new alignment
+WEIGHT_POWER = 1

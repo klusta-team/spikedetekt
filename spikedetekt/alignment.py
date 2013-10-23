@@ -322,7 +322,12 @@ def extract_wave_twothresholds(IndList, FilteredArr, ManipulatedArr, s_before,
     # (masks between 0 and 1).
     comp_clipped = np.clip((comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak), 0, 1)
     # now we take the weighted average of the sample times in the component
-    s_fracpeak = np.sum(comp_clipped * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_clipped)
+    if Parameters['AMPLITUDE_WEIGHT']:
+        s_fracpeak = np.sum(np.power(comp,Parameters['WEIGHT_POWER']) * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp)
+    # The weights are comp itself (i.e. the amplitude of the manipulated signal)
+    else:
+        s_fracpeak = np.sum(np.power(comp_clipped,Parameters['WEIGHT_POWER']) * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_clipped) 
+    # The weights are the clipped values of comp
     s_fracpeak += SampArrMin
     
     
