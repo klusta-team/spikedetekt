@@ -321,12 +321,17 @@ def extract_wave_twothresholds(IndList, FilteredArr, ManipulatedArr, s_before,
     # In the window of the chunk (connected component), we take the clipped Hilbert 
     # (masks between 0 and 1).
     comp_clipped = np.clip((comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak), 0, 1)
+    comp_normalised = (comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak)
     # now we take the weighted average of the sample times in the component
+    #print comp
+    #print comp_clipped
+    #embed()
     if Parameters['AMPLITUDE_WEIGHT']:
-        s_fracpeak = np.sum(np.power(comp,Parameters['WEIGHT_POWER']) * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp)
+        s_fracpeak = np.sum(np.power(comp,Parameters['WEIGHT_POWER']) * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(np.power(comp,Parameters['WEIGHT_POWER']))
     # The weights are comp itself (i.e. the amplitude of the manipulated signal)
     else:
-        s_fracpeak = np.sum(np.power(comp_clipped,Parameters['WEIGHT_POWER']) * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_clipped) 
+        s_fracpeak = np.sum(np.power(comp_normalised,Parameters['WEIGHT_POWER']) * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(np.power(comp_normalised,Parameters['WEIGHT_POWER']))
+    
     # The weights are the clipped values of comp
     s_fracpeak += SampArrMin
     
@@ -416,9 +421,13 @@ def extract_wave_hilbert_new(IndList, FilteredArr, FilteredHilbertArr, s_before,
     #################################
     # In the window of the chunk (connected component), we take the clipped Hilbert 
     # (masks between 0 and 1).
+    
     comp_clipped = np.clip((comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak), 0, 1)
+    # No need to clip - might makes things worse - you lose the peaks!
+    comp_normalised = (comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak)
+    
     # now we take the weighted average of the sample times in the component
-    s_fracpeak = np.sum(comp_clipped * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_clipped)
+    s_fracpeak = np.sum(comp_normalised * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_normalised)
     s_fracpeak += SampArrMin
     
     
