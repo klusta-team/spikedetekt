@@ -4,6 +4,7 @@ import matplotlib.image as mpimg
 from matplotlib.backends.backend_pdf import PdfPages
 from parameters import Parameters, GlobalVariables
 from IPython import embed # For manual debugging
+from alignment import extract_wave, extract_wave_hilbert_old, extract_wave_hilbert_new,extract_wave_twothresholds, InterpolationError
 
 #multdetection_times_ms = [4630, 4640]
 #multdetection_times_ms = Parameters['OBSERVATION_TIMES']
@@ -91,6 +92,9 @@ def plot_diagnostics(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,thr
                     debug_fd.write(str(indlist)+'\n')
                     debug_fd.write('\n') 
                     debug_fd.flush()       # makes sure everything is written to the debug file as program proceeds 
+                    
+                    
+                    
 
             plt.figure()
           #  plt.suptitle('%s \n with %s \n Time %s ms'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint_ms), fontsize=10, fontweight='bold')
@@ -174,6 +178,7 @@ def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunkweak, binaryc
              # sampmin = interestpoint - s_start - 3
             sampmin = np.amax([0,interestpoint - s_start - samples_backward])
             sampmax = sampmin + window_width 
+            print 'sampmin, sampmaz ',sampmin, sampmax
            # figdat= plt.figure()
           #  plt.figure()
           #   axdat = figdat.add_subplot(111) # stupid axis object (trivial subplot)
@@ -201,6 +206,7 @@ def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunkweak, binaryc
             
             connected_comp_enum = np.zeros_like(binarychunk)
             j = 0
+            debugnextbits = []
             for k,indlist in enumerate(indlistchunk):
                 indtemparray = np.array(indlist)
                 #print k,':',indlist, '\n'
@@ -222,9 +228,30 @@ def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunkweak, binaryc
                     debug_fd.write(str(k)+': '+'\n')
                     debug_fd.write(str(indlist)+'\n')
                     debug_fd.write('\n') 
-                    debug_fd.flush()       # makes sure everything is written to the debug file as program proceeds 
+                    debug_fd.flush()       # makes sure everything is written to the debug file as program proceeds
+                    
+                    
+                    N_CH = Parameters['N_CH']
+                    
+                    S_BEFORE = Parameters['S_BEFORE']
+                    S_AFTER = Parameters['S_AFTER']
+                    if Parameters['DETECT_POSITIVE']:
+                        wave, s_peak, sf_peak, cm, fcm = extract_wave_twothresholds(indlist, filteredchunk,
+                                                    filteredchunk,
+                                                    S_BEFORE, S_AFTER, N_CH,
+                                                    s_start, ThresholdStrong, ThresholdWeak) 
+                    else:
+                        wave, s_peak, sf_peak, cm, fcm = extract_wave_twothresholds(indlist, filteredchunk,
+                                                    -filteredchunk,
+                                                    S_BEFORE, S_AFTER, N_CH,
+                                                    s_start, ThresholdStrong, ThresholdWeak)
+                    debugnextbits.append((s_peak, sf_peak))
+                    print 'debugnextbits =', debugnextbits
+                    #embed()
+
 
             plt.figure()
+            print 'plotting figure now'
             #plt.suptitle('%s \n with %s \n Time %s ms'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint_ms), fontsize=10, fontweight='bold')
             plt.suptitle('%s \n with %s \n Time %s samples'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint), fontsize=10, fontweight='bold')
            # plt.suptitle('Time %s ms'%(interestpoint_ms), fontsize=14, fontweight='bold')
@@ -241,6 +268,10 @@ def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunkweak, binaryc
             conaxis = plt.subplot(4,2,8)
             conaxis.set_title('Connected Components',fontsize=10)
             imcon = conaxis.imshow(np.transpose(connected_comp_enum[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imcon);
+            for spiketimedebug in debugnextbits:
+                conaxis.axvline(spiketimedebug[1]-sampmin) #plot a vertical line for s_fpeak
+                print spiketimedebug[1]-sampmin
+            
             constrongaxis = plt.subplot(4,2,4)
             constrongaxis.set_title('Strong Connected Components',fontsize=10)
             imconstrong = constrongaxis.imshow(np.transpose(binarychunkstrong[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imconstrong);
