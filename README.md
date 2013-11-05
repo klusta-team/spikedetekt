@@ -42,6 +42,8 @@ To perform spike detection, you need:
 * a .probe file, which contains information about the electrode,
 * a .params file, which contains all other parameters.
 
+The .dat file is a flat file of two byte signed integers, in the order [Time1Channel1, Time1Channel2, .. Time1ChannelN, Time2Channel1, ...]
+
 The above may have any combination of names. The name of your .params file will be the name of the folder where all the output will be stored. The simplest case is when you have the same name for all three files:
 
     myexperiment.dat
