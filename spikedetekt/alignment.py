@@ -321,16 +321,26 @@ def extract_wave_twothresholds(IndList, FilteredArr, ManipulatedArr, s_before,
     # In the window of the chunk (connected component), we take the clipped Hilbert 
     # (masks between 0 and 1).
     comp_clipped = np.clip((comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak), 0, 1)
-    comp_normalised = (comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak)
+    comp_normalised = np.maximum((comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak),0)
+    #if (ThresholdWeak != ThresholdStrong):
+      #  comp_normalised = np.maximum((comp - ThresholdWeak) / (ThresholdStrong - ThresholdWeak),0)
+    #else:
+     #   comp_normalised = np.maximum((comp - ThresholdStrong),0)
+    comp_normalised_power = np.power(comp_normalised,Parameters['WEIGHT_POWER'])
+    comp = np.maximum(comp,0)
+    comp_power = np.power(comp,Parameters['WEIGHT_POWER'])
+    #embed()
     # now we take the weighted average of the sample times in the component
     #print comp
     #print comp_clipped
     #embed()
     if Parameters['AMPLITUDE_WEIGHT']:
-        s_fracpeak = np.sum(np.power(comp,Parameters['WEIGHT_POWER']) * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(np.power(comp,Parameters['WEIGHT_POWER']))
+        s_fracpeak = np.sum(comp_power * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_power)
+#       s_fracpeak = np.sum(np.power(comp,Parameters['WEIGHT_POWER']) * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(np.power(comp,Parameters['WEIGHT_POWER']))
     # The weights are comp itself (i.e. the amplitude of the manipulated signal)
     else:
-        s_fracpeak = np.sum(np.power(comp_normalised,Parameters['WEIGHT_POWER']) * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(np.power(comp_normalised,Parameters['WEIGHT_POWER']))
+        s_fracpeak = np.sum( comp_normalised_power * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(comp_normalised_power)
+     #   s_fracpeak = np.sum(np.power(comp_normalised,Parameters['WEIGHT_POWER']) * np.arange(SampArrMax - SampArrMin).reshape((-1, 1))) / np.sum(np.power(comp_normalised,Parameters['WEIGHT_POWER']))
     
     # The weights are the clipped values of comp
     s_fracpeak += SampArrMin
@@ -364,7 +374,7 @@ def extract_wave_twothresholds(IndList, FilteredArr, ManipulatedArr, s_before,
         raise InterpolationError
     Wave = f(new_s)
     
-    return Wave, s_peak, s_fracpeak, ChMask, FloatChMask
+    return Wave, s_peak, s_fracpeak, ChMask, FloatChMask,comp_normalised, comp_normalised_power
 
 def extract_wave_hilbert_new(IndList, FilteredArr, FilteredHilbertArr, s_before, 
                      s_after, n_ch, s_start, ThresholdStrong, ThresholdWeak):

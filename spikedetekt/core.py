@@ -403,12 +403,12 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             for IndList in IndListsChunk:
                 try:
                     if Parameters['DETECT_POSITIVE']:
-                        wave, s_peak, sf_peak, cm, fcm = extract_wave_twothresholds(IndList, FilteredChunk,
+                        wave, s_peak, sf_peak, cm, fcm, comp_normalised, comp_normalised_power = extract_wave_twothresholds(IndList, FilteredChunk,
                                                     FilteredChunk,
                                                     S_BEFORE, S_AFTER, N_CH,
                                                     s_start, ThresholdStrong, ThresholdWeak) 
                     else:
-                        wave, s_peak, sf_peak, cm, fcm = extract_wave_twothresholds(IndList, FilteredChunk,
+                        wave, s_peak, sf_peak, cm, fcm,comp_normalised, comp_normalised_power = extract_wave_twothresholds(IndList, FilteredChunk,
                                                     -FilteredChunk,
                                                     S_BEFORE, S_AFTER, N_CH,
                                                     s_start, ThresholdStrong, ThresholdWeak)

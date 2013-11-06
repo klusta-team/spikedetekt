@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import pickle 
 from matplotlib.backends.backend_pdf import PdfPages
 from parameters import Parameters, GlobalVariables
 from IPython import embed # For manual debugging
@@ -236,56 +237,87 @@ def plot_diagnostics_twothresholds(s_start,indlistchunk,binarychunkweak, binaryc
                     S_BEFORE = Parameters['S_BEFORE']
                     S_AFTER = Parameters['S_AFTER']
                     if Parameters['DETECT_POSITIVE']:
-                        wave, s_peak, sf_peak, cm, fcm = extract_wave_twothresholds(indlist, filteredchunk,
+                        wave, s_peak, sf_peak, cm, fcm, comp_normalised, comp_normalised_power = extract_wave_twothresholds(indlist, filteredchunk,
                                                     filteredchunk,
                                                     S_BEFORE, S_AFTER, N_CH,
                                                     s_start, ThresholdStrong, ThresholdWeak) 
                     else:
-                        wave, s_peak, sf_peak, cm, fcm = extract_wave_twothresholds(indlist, filteredchunk,
+                        wave, s_peak, sf_peak, cm, fcm, comp_normalised, comp_normalised_power = extract_wave_twothresholds(indlist, filteredchunk,
                                                     -filteredchunk,
                                                     S_BEFORE, S_AFTER, N_CH,
                                                     s_start, ThresholdStrong, ThresholdWeak)
+                    #embed()                                
                     debugnextbits.append((s_peak, sf_peak))
                     print 'debugnextbits =', debugnextbits
+                    debug_fd.write('debugnextbits ='+ str(debugnextbits)+'\n')
+                    debug_fd.flush()  
                     #embed()
 
 
             plt.figure()
+            filtchunk_normalised = np.maximum((filteredchunk - ThresholdWeak) / (ThresholdStrong - ThresholdWeak),0)
+            filtchunk_normalised_power = np.power(filtchunk_normalised,Parameters['WEIGHT_POWER'])
+            
             print 'plotting figure now'
-            #plt.suptitle('%s \n with %s \n Time %s ms'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint_ms), fontsize=10, fontweight='bold')
-            plt.suptitle('%s \n with %s \n Time %s samples'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint), fontsize=10, fontweight='bold')
+            
+            #plt.suptitle('%s \n with %s \n Time %s samples'%(Parameters['RAW_DATA_FILES'],Parameters['PROBE_FILE'],interestpoint), fontsize=10, fontweight='bold')
            # plt.suptitle('Time %s ms'%(interestpoint_ms), fontsize=14, fontweight='bold')
-            plt.subplots_adjust(hspace = 0.5)
-            dataxis = plt.subplot(4,2,1)
-            dataxis.set_title('DatChunks',fontsize=10)
-            imdat = dataxis.imshow(np.transpose(datchunk[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imdat);
-            binaxis = plt.subplot(4,2,3)
-            binaxis.set_title('FilteredChunks',fontsize=10)
-            imbin = binaxis.imshow(np.transpose(filteredchunk[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imbin);
-            filaxis = plt.subplot(4,2,2)
-            filaxis.set_title('BinChunks',fontsize=10)
-            imfil = filaxis.imshow(np.transpose(binarychunk[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imfil);
-            conaxis = plt.subplot(4,2,8)
-            conaxis.set_title('Connected Components',fontsize=10)
-            imcon = conaxis.imshow(np.transpose(connected_comp_enum[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imcon);
+            #plt.subplots_adjust(hspace = 0.5)
+            plt.subplots_adjust(hspace = 0.25,left= 0.12, bottom = 0.10, right = 0.90, top = 0.90, wspace = 0.2)
+            
+            #dataxis = plt.subplot(4,2,1)
+            #dataxis.set_title('DatChunks',fontsize=10)
+            #imdat = dataxis.imshow(np.transpose(datchunk[sampmin:sampmax,:]),interpolation="nearest",aspect="auto");#plt.colorbar(imdat);
+            
+            #binaxis = plt.subplot(4,2,3)
+            #binaxis.set_title('FilteredChunks',fontsize=10)
+            #imbin = binaxis.imshow(np.transpose(filteredchunk[sampmin:sampmax,:]),interpolation="nearest",aspect="auto");#plt.colorbar(imbin);
+            
+            #filaxis = plt.subplot(4,2,2)
+            filaxis = plt.subplot(3,1,2)
+            #filaxis.set_title('BinChunks',fontsize=10)
+            imfil = filaxis.imshow(np.transpose(binarychunk[sampmin:sampmax,:]),interpolation="nearest",aspect="auto");
+            plt.ylabel('Channels')#plt.colorbar(imfil);
+            
+            #conaxis = plt.subplot(4,2,8)
+            conaxis = plt.subplot(3,1,3)
+            #conaxis.set_title('Connected Components',fontsize=10)
+            imcon = conaxis.imshow(np.transpose(connected_comp_enum[sampmin:sampmax,:]),interpolation="nearest",aspect="auto");#plt.colorbar(imcon);
+            plt.xlabel('Samples')
+            plt.ylabel('Channels')
             for spiketimedebug in debugnextbits:
-                conaxis.axvline(spiketimedebug[1]-sampmin) #plot a vertical line for s_fpeak
+                conaxis.axvline(spiketimedebug[1]-sampmin,color = 'w') #plot a vertical line for s_fpeak
                 print spiketimedebug[1]-sampmin
             
-            constrongaxis = plt.subplot(4,2,4)
-            constrongaxis.set_title('Strong Connected Components',fontsize=10)
-            imconstrong = constrongaxis.imshow(np.transpose(binarychunkstrong[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imconstrong);
-            conweakaxis = plt.subplot(4,2,6)
-            conweakaxis.set_title('Weak Connected Components',fontsize=10)
-            imconweak = conweakaxis.imshow(np.transpose(binarychunkweak[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imconweak);
-           # filaxis.set_title('SDChunks',fontsize=10)
-           # imfil = filaxis.imshow(filteredchunk[sampmin:sampmax,:]/(-threshold[:]),interpolation="nearest");plt.colorbar(imfil);
-            hilaxis = plt.subplot(4,2,5)
-            hilaxis.set_title('ManipulatedChunks, Hilbert: %s'%(Parameters['USE_HILBERT']),fontsize=10)
-            imhil = hilaxis.imshow(np.transpose(hilbertchunk[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imhil);
-            #plt.savefig('floodfillchunk_%s.pdf'%(interestpoint_ms))
-            plt.savefig('floodfillchunk_%s_samples.pdf'%(interestpoint))
+            #constrongaxis = plt.subplot(4,2,4)
+            #constrongaxis.set_title('Strong Connected Components',fontsize=10)
+            #imconstrong = constrongaxis.imshow(np.transpose(binarychunkstrong[sampmin:sampmax,:]),interpolation="nearest",aspect="auto");#plt.colorbar(imconstrong);
             
+            ##compoweraxis = plt.subplot(4,2,7)
+            ##compoweraxis.set_title('power weight',fontsize=10)
+            ##imcompower = compoweraxis.imshow(np.transpose(filtchunk_normalised_power[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imcompower);
+            ##for spiketimedebug in debugnextbits:
+            ##    compoweraxis.set_title('comp_normalised_power',fontsize=10)
+            ##imconstrong = compoweraxis.imshow(np.transpose(binarychunkstrong[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imconstrong);
+            
+            #conweakaxis = plt.subplot(4,2,6)
+           # conweakaxis.set_title('Weak Connected Components',fontsize=10)
+           # imconweak = conweakaxis.imshow(np.transpose(binarychunkweak[sampmin:sampmax,:]),interpolation="nearest",aspect="auto");#plt.colorbar(imconweak);
+          # # filaxis.set_title('SDChunks',fontsize=10)
+          ## imfil = filaxis.imshow(filteredchunk[sampmin:sampmax,:]/(-threshold[:]),interpolation="nearest");plt.colorbar(imfil);
+            
+            #hilaxis = plt.subplot(4,2,5)
+            hilaxis = plt.subplot(3,1,1)
+            #hilaxis.set_title('ManipulatedChunks, Hilbert: %s'%(Parameters['USE_HILBERT']),fontsize=10)
+            #hilaxis.set_title('Filtered data', fontsize=10)
+            imhil = hilaxis.imshow(np.transpose(hilbertchunk[sampmin:sampmax,:]),interpolation="nearest",aspect="auto");
+            plt.ylabel('Channels')#plt.colorbar(imhil);
+            #plt.savefig('floodfillchunk_%s.pdf'%(interestpoint_ms))
+            #plt.tight_layout()
+            plt.show()
+            plt.savefig('floodfillchunk_%s_samples.pdf'%(interestpoint))
+            tosave = [debugnextbits,binarychunkweak,binarychunkstrong,binarychunk,filteredchunk,datchunk,connected_comp_enum,sampmin,sampmax]
+            pickle.dump(tosave,open('savegraphdata_%s.p'%(interestpoint),'wb'))
             
 # plt.show()
    #         plt.figure();plt.imshow(binarychunk[sampmin:sampmax,:],interpolation="nearest");plt.colorbar();plt.savefig(pp,format='pdf')
