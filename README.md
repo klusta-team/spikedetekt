@@ -7,6 +7,8 @@ This software was developed at the [Cortical Processing Laboratory](http://www.u
 
 Please send feedback to Kenneth Harris (firstname at cortexlab.net), Shabnam Kadir (firstname at cortexlab.net)
 
+Subscribe to our googlegroups by sending an email to:  klustaviewas+subscribe 'at' googlegroups.com
+
 Here is a quick Start Guide (will become more comprehensive with time):
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
