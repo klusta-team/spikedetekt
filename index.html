@@ -37,6 +37,8 @@
 
 <p>Please send feedback to Kenneth Harris (firstname at cortexlab.net), Shabnam Kadir (firstname at cortexlab.net)</p>
 
+<p>Subscribe to our googlegroups by sending an email to:  klustaviewas+subscribe 'at' googlegroups.com</p>
+
 <h2>
 <a name="here-is-a-quick-start-guide-will-become-more-comprehensive-with-time" class="anchor" href="#here-is-a-quick-start-guide-will-become-more-comprehensive-with-time"><span class="octicon octicon-link"></span></a>Here is a quick Start Guide (will become more comprehensive with time):</h2>
 
@@ -53,7 +55,6 @@
 <li>NumPy</li>
 <li>SciPy</li>
 <li>PyTables</li>
-<li>Cjson</li>
 <li>h5py</li>
 </ul><p>Once you have set up Python on your system, download and unzip/tar either the .zip file or the tarball,
 go to the `spikedetekt' folder and type (on the command line):</p>
@@ -74,7 +75,9 @@ go to the `spikedetekt' folder and type (on the command line):</p>
 <li>a .dat file (which contains your raw unfiltered electrode data), </li>
 <li>a .probe file, which contains information about the electrode,</li>
 <li>a .params file, which contains all other parameters.</li>
-</ul><p>The above may have any combination of names. The name of your .params file will be the name of the folder where all the output will be stored. The simplest case is when you have the same name for all three files:</p>
+</ul><p>The .dat file is a flat file of two byte signed integers, in the order [Time1Channel1, Time1Channel2, .. Time1ChannelN, Time2Channel1, ...]</p>
+
+<p>The above may have any combination of names. The name of your .params file will be the name of the folder where all the output will be stored. The simplest case is when you have the same name for all three files:</p>
 
 <pre><code>myexperiment.dat
 myexperiment.probe
