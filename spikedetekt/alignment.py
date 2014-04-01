@@ -7,6 +7,7 @@ from scipy.interpolate import interp1d
 from utils import get_padded
 from parameters import Parameters, GlobalVariables
 from log import log_warning
+#from IPython import embed
 
 def extract_wave(IndList, FilteredArr, s_before, s_after, n_ch, s_start,Threshold):
     '''
@@ -168,7 +169,8 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start,Thre
             if Parameters['USE_SINGLE_THRESHOLD']:
                 weight = -(X[i_intpeak]+Threshold)
             else:
-                weight = -(X[i_intpeak]+Threshold[ch])
+                weight = -(X[i_intpeak]+Threshold[ChMask][ch])
+                #embed()
             if weight<0:
                 weight = 0
             peak_sum += s_fracpeak*weight

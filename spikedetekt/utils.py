@@ -20,7 +20,7 @@ def get_padded(Arr, Start, End):
     if Start < 0 and End >= Arr.shape[0]:
         raise IndexError("Can have Start<0 OR End>len(Arr) but not both.\n \
                            This error has probably occured because your Thresholds \n \
-                             are aritificially low due to early artifacts\n \
+                             are artificially low due to early artifacts\n \
                              Increase the parameter CHUNKS_FOR_THRESH ")
     if Start < 0:
         StartZeros = np.zeros((-Start, Arr.shape[1]), dtype=Arr.dtype)
