@@ -374,6 +374,7 @@ def extract_wave_twothresholds(IndList, FilteredArr, ManipulatedArr, s_before,
         raise InterpolationError
     Wave = f(new_s)
     
+    ##embed() 
     return Wave, s_peak, s_fracpeak, ChMask, FloatChMask,comp_normalised, comp_normalised_power
 
 def extract_wave_hilbert_new(IndList, FilteredArr, FilteredHilbertArr, s_before, 

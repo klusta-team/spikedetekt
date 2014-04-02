@@ -27,6 +27,7 @@ from log import log_message, log_warning
 from IPython import embed
 import debug
 from debug import plot_diagnostics, plot_diagnostics_twothresholds# for debugging with Parameters['DEBUG'] 
+import pickle
 
 
 def set_globals_samples(sample_rate,high_frequency_factor):
@@ -200,6 +201,7 @@ def spike_detection_from_raw_data(basename, DatFileNames, n_ch_dat, Channels_dat
         PC_3s = reget_features(X)
         for sd_row, w_row in izip(shank_table['spikedetekt', shank],
                                   shank_table['waveforms', shank]):
+            ##embed()
             f = project_features(PC_3s, w_row['wave'])
             
             ### NEW
@@ -276,6 +278,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             Threshold = ThresholdSDFactor*THRESH_SD
             print 'Threshold = ', Threshold, '\n' 
             Parameters['THRESHOLD'] = Threshold #Record the absolute Threshold used
+            
         
     # set the high and low thresholds 
     if Parameters['USE_HILBERT']:
@@ -284,7 +287,10 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
     elif Parameters['USE_COMPONENT_ALIGNFLOATMASK']:#to be used with a single threshold only
         ThresholdStrong = Threshold
         ThresholdWeak = ThresholdSDFactor*THRESH_SD_LOWER
-    
+    picklefile =     open("threshold.p","wb")
+    pickle.dump([ThresholdStrong,ThresholdWeak], picklefile)
+    threshold_outputstring = 'Threshold strong = ' + repr(ThresholdStrong) + '\n' + 'Threshold weak = ' + repr(ThresholdWeak)
+    log_message(threshold_outputstring)
         
     n_samples = num_samples(DatFileNames, n_ch_dat)
     spike_count = 0
