@@ -173,7 +173,7 @@ def extract_wave_new(IndList, FilteredArr, s_before, s_after, n_ch, s_start,Thre
             if Parameters['USE_SINGLE_THRESHOLD']:
                 weight = -(X[i_intpeak]+Threshold)
             else:
-                weight = -(X[i_intpeak]+Threshold[ch])
+                weight = -(X[i_intpeak]+Threshold[ChMask][ch])
             if weight<0:
                 weight = 0
             peak_sum += s_fracpeak*weight
