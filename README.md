@@ -124,11 +124,11 @@ If there are odd channels on one edge, even channels on the other, the .probe fi
 		    ]
 	    }
 
-Further examples of probe files can be found in the distribution: 
+Further examples of probe files can be found in the [kwiklib](https://github.com/klusta-team/kwiklib/tree/master/data/probefiles) distribution: 
 
-* buzsaki32.probe
-* linear16.probe
-* multishankslinear32.probe (an 8 shank example)
+* 32chan1shankbuzsaki.probe
+* buzsaki8.probe
+* tetrode.probe
 
 
 3) Parameters to adjust
