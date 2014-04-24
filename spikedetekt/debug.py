@@ -115,7 +115,7 @@ def plot_diagnostics(s_start,indlistchunk,binarychunk,datchunk,filteredchunk,thr
             imcon = conaxis.imshow(np.transpose(connected_comp_enum[sampmin:sampmax,:]),interpolation="nearest");plt.colorbar(imcon);
             sdaxis = plt.subplot(3,2,5)
             sdaxis.set_title('SDChunks',fontsize=10)
-            if Parameters['USE_SINGLE_THRESHOLD']:
+            if Parameters['USE_CHANNEL_INDEPENDENT_THRESHOLD']:
                 imsd = sdaxis.imshow(np.transpose(filteredchunk[sampmin:sampmax,:]/(-threshold)),interpolation="nearest");plt.colorbar(imsd);
             else: 
                 imsd = sdaxis.imshow(np.transpose(filteredchunk[sampmin:sampmax,:]/(-threshold[:])),interpolation="nearest");plt.colorbar(imsd);

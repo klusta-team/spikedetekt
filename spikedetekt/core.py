@@ -271,7 +271,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
             first_chunks_std = np.std(FilteredChunk)
             print 'first_chunks_std',  first_chunks_std, '\n'
         else:
-            if Parameters['USE_SINGLE_THRESHOLD']:
+            if Parameters['USE_CHANNEL_INDEPENDENT_THRESHOLD']:
                 ThresholdSDFactor = np.median(np.abs(FilteredChunk))/.6745
             else:
                 ThresholdSDFactor = np.median(np.abs(FilteredChunk), axis=0)/.6745
