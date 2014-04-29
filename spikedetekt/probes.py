@@ -67,7 +67,7 @@ class Probe(object):
                     pairs.append((j, i))
                 else:
                     pairs.append((i,j))
-                    print 'self adjacency: ', i
+                    print 'singleton channel: ', i
                 #    raise ValueError("Probe graph doesn't allow self-connections.")
             if len(set(pairs))<len(pairs):
                 raise ValueError("Repeated edge found in probe graph.")
