@@ -66,7 +66,9 @@ class Probe(object):
                 elif i>j:
                     pairs.append((j, i))
                 else:
-                    raise ValueError("Probe graph doesn't allow self-connections.")
+                    pairs.append((i,j))
+                    print 'singleton channel: ', i
+                    #raise ValueError("Probe graph doesn't allow self-connections.")
             if len(set(pairs))<len(pairs):
                 raise ValueError("Repeated edge found in probe graph.")
         # construct the vertex set for each probe, check there are no overlaps
