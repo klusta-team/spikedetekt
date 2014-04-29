@@ -4,7 +4,7 @@ import matplotlib.image as mpimg
 import pickle 
 from matplotlib.backends.backend_pdf import PdfPages
 from parameters import Parameters, GlobalVariables
-from IPython import embed # For manual debugging
+#from IPython import embed # For manual debugging
 from alignment import extract_wave, extract_wave_hilbert_old, extract_wave_hilbert_new,extract_wave_twothresholds, InterpolationError
 
 #multdetection_times_ms = [4630, 4640]

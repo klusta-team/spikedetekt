@@ -7,7 +7,7 @@ from scipy.interpolate import interp1d
 from utils import get_padded
 from parameters import Parameters, GlobalVariables
 from log import log_warning
-from IPython import embed
+#from IPython import embed
 
 class InterpolationError(Exception):
     pass

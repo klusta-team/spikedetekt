@@ -24,10 +24,10 @@ from time import sleep
 from subsets import cluster_withsubsets
 from masking import get_float_mask
 from log import log_message, log_warning
-from IPython import embed
+#from IPython import embed
 import debug
 from debug import plot_diagnostics, plot_diagnostics_twothresholds# for debugging with Parameters['DEBUG'] 
-import pickle
+#import pickle
 
 
 def set_globals_samples(sample_rate,high_frequency_factor):
@@ -287,8 +287,8 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
     elif Parameters['USE_COMPONENT_ALIGNFLOATMASK']:#to be used with a single threshold only
         ThresholdStrong = Threshold
         ThresholdWeak = ThresholdSDFactor*THRESH_SD_LOWER
-    picklefile =     open("threshold.p","wb")
-    pickle.dump([ThresholdStrong,ThresholdWeak], picklefile)
+   # picklefile =     open("threshold.p","wb")
+   # pickle.dump([ThresholdStrong,ThresholdWeak], picklefile)
     threshold_outputstring = 'Threshold strong = ' + repr(ThresholdStrong) + '\n' + 'Threshold weak = ' + repr(ThresholdWeak)
     log_message(threshold_outputstring)
         
@@ -370,7 +370,7 @@ def extract_spikes(h5s, basename, DatFileNames, n_ch_dat,
         if Parameters['WRITE_BINFIL_FILE']:
             fil_writer.write_bin(BinaryChunk, s_start, s_end, keep_start, keep_end)
         
-        print len(IndListsChunk), 'len(IndListsChunk)'
+#        print len(IndListsChunk), 'len(IndListsChunk)'
         ############## ALIGN AND INTERPOLATE WAVES #######################
         nextbits = []
         if Parameters['USE_HILBERT']:
