@@ -207,5 +207,5 @@ where T1, T2, T3, etc. should be replaced with the time in samples, where you wo
 If you have used KlustaKwik for a scientific publication, please cite our paper,
 'High-dimensional cluster analysis with the Masked EM Algorithm' by Shabnam N. Kadir, Dan F.M. Goodman and Kenneth D. Harris (2014) Neural Computation, 26:2379-2394.
 
-If you have used SpikeDetekt and/or KlustaViewa, please cite "Spike sorting for large, dense electrode arrays" by Cyrille Rossant*, Shabnam N Kadir*, Dan F. M. Goodman , John Schulman , Mariano Belluscio , Gyorgy Buzsaki , Kenneth D. Harris (2015) bioRxiv http://dx.doi.org/10.1101/015198
+If you have used SpikeDetekt and/or KlustaViewa, please cite "Spike sorting for large, dense electrode arrays" by Cyrille Rossant, Shabnam N Kadir, Dan F. M. Goodman , John Schulman , Mariano Belluscio , Gyorgy Buzsaki , Kenneth D. Harris (2015). bioRxiv http://dx.doi.org/10.1101/015198
 
