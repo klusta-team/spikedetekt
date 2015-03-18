@@ -191,11 +191,12 @@ In addition, the following file will also be output:
   .raw.h5. (See spikdetekt/docs/fileformat.md for more details).
 
 6) Debugging
+-------------
 
 If SpikeDetekt is giving strange results, run the debug module to visualize the problem. To do so, add the following lines to your parameter file:
 
-debug = True
-observation_time_samples = [T1, T2, T3, ...] 
+	debug = True
+	observation_time_samples = [T1, T2, T3, ...] 
 
 where T1, T2, T3, etc. should be replaced with the time in samples, where you would like to observe spikes.
 
