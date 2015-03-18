@@ -190,10 +190,21 @@ In addition, the following file will also be output:
   .main.h5,
   .raw.h5. (See spikdetekt/docs/fileformat.md for more details).
 
-6) How to cite
+6) Debugging
+
+If SpikeDetekt is giving strange results, run the debug module to visualize the problem. To do so, add the following lines to your parameter file:
+
+debug = True
+observation_time_samples = [T1, T2, T3, ...] 
+
+where T1, T2, T3, etc. should be replaced with the time in samples, where you would like to observe spikes.
+
+
+7) How to cite
 --------------
 
-If you have used KlustaKwik and/or SpikeDetekt for a scientific publication, please cite our preprint on the arxiv,
-'High-dimensional cluster analysis with the Masked EM Algorithm' by Shabnam N. Kadir, Dan F.M. Goodman and Kenneth D. Harris:
+If you have used KlustaKwik for a scientific publication, please cite our paper,
+'High-dimensional cluster analysis with the Masked EM Algorithm' by Shabnam N. Kadir, Dan F.M. Goodman and Kenneth D. Harris (2014) Neural Computation, 26:2379-2394.
 
-http://arxiv.org/abs/1309.2848
+If you have used SpikeDetekt and/or KlustaViewa, please cite "Spike sorting for large, dense electrode arrays" by Cyrille Rossant*, Shabnam N Kadir*, Dan F. M. Goodman , John Schulman , Mariano Belluscio , Gyorgy Buzsaki , Kenneth D. Harris (2015) bioRxiv http://dx.doi.org/10.1101/015198
+
